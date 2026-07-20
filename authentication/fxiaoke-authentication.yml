@@ -1,0 +1,68 @@
+generated: '2026-07-19'
+method: searched
+source: https://developer.fxiaoke.com/openapi_v2/en/start/auth/app-info.html
+docs: https://developer.fxiaoke.com/openapi_v2/en/start/quickstart/start.html
+summary:
+  types: [oauth2, custom-token]
+  api_key_in: [body]
+  oauth2_flows: [clientCredentials, authorizationCode]
+  base_host: https://open.fxiaoke.com
+schemes:
+- name: enterprise-app-token
+  type: oauth2
+  flow: clientCredentials
+  description: >-
+    Self-built enterprise application flow. A tenant creates a self-built app in the
+    Fxiaoke admin console (developer mode) and receives appId, appSecret, and a
+    permanentCode. These are exchanged for a short-lived access token (called
+    corpAccessToken / app access token) that authenticates all subsequent Open API v2
+    calls.
+  token_endpoint: https://open.fxiaoke.com/oauth2.0/token
+  token_query_params:
+  - thirdTraceId   # caller-supplied random trace string
+  request:
+    content_type: application/json
+    method: POST
+    fields:
+    - {name: appId, required: true}
+    - {name: appSecret, required: true}
+    - {name: permanentCode, required: true}
+    - {name: grantType, required: true, value: app_secret}
+  response_fields:
+  - accessToken
+  - expiresIn
+  - openUserId
+  - appId
+  - ea            # enterprise account
+  - errorCode
+  - errorMessage
+  - traceId
+  token_lifetime_seconds: 7200
+  caching_guidance: >-
+    Token is valid for 2 hours (7200s). Callers must cache it for at least 6600s and
+    refresh by re-calling the token endpoint between 6650s and 7200s; the token
+    expires at 7200s.
+- name: oauth2.1-pkce
+  type: oauth2
+  flow: authorizationCode
+  description: >-
+    Modern OAuth 2.1 authorization server discoverable via RFC 8414 metadata at
+    https://open.fxiaoke.com/.well-known/oauth-authorization-server. Public clients
+    (token_endpoint_auth_methods = none) use PKCE (S256) with authorization_code and
+    refresh_token grants, and may self-register via the RFC 7591 dynamic client
+    registration endpoint.
+  issuer: https://open.fxiaoke.com/oauth2.0
+  authorization_endpoint: https://open.fxiaoke.com/oauth2.0/cli/authorize
+  token_endpoint: https://open.fxiaoke.com/oauth2.0/pkce/token
+  registration_endpoint: https://open.fxiaoke.com/oauth2.0/register
+  jwks_uri: https://open.fxiaoke.com/oauth2.0/jwks
+  grant_types: [authorization_code, refresh_token]
+  code_challenge_methods: [S256]
+  token_endpoint_auth_methods: [none]
+  id_token_signing_alg: [RS256]
+notes: >-
+  Open API v2 calls carry the token plus tenant context (corpId / currentOpenUserId
+  derived from openUserId) in the JSON request body rather than an Authorization
+  header. No OpenAPI/Swagger definition is published, so this profile was captured
+  from the developer documentation and the live RFC 8414 metadata rather than derived
+  from a spec.
