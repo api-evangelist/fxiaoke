@@ -1,0 +1,39 @@
+# Fxiaoke (纷享销客)
+
+> Fxiaoke is a Chinese enterprise SaaS company providing a connected, AI-driven "Agentic CRM" platform spanning marketing, sales, and customer service for 6,000+ enterprise customers. Its Open API v2 exposes CRM business objects (accounts, contacts, leads, opportunities, products, orders) and common services (approval workflows, directory/contact sync, business-data sync) as a JSON-over-HTTP POST RPC interface hosted at open.fxiaoke.com, authenticated with a self-built enterprise app (appId + appSecret + permanentCode) exchanged for an access token, plus a modern OAuth 2.1 (PKCE) authorization server.
+
+## APIs
+
+- [Fxiaoke Open API v2](https://developer.fxiaoke.com/openapi_v2/): CRM business-object and common-service API over JSON/HTTP POST; base host https://open.fxiaoke.com
+
+## Docs
+
+- [Open API v2 developer manual](https://developer.fxiaoke.com/openapi_v2/): tutorials, guides, and API reference
+- [Quick start](https://developer.fxiaoke.com/openapi_v2/start/quickstart/start.html): create a self-built app and obtain credentials
+- [OAuth / access token](https://developer.fxiaoke.com/openapi_v2/en/start/auth/app-info.html): appId + appSecret + permanentCode token grant
+- [API call examples](https://developer.fxiaoke.com/openapi_v2/en/start/example/example.html): request/response format and global return codes
+- [Business object reference (Product create)](https://developer.fxiaoke.com/openapi_v2/object/CommoditiesAndProducts/ProductObj/add.html): object CRUD reference
+- [Common services (approval action)](https://developer.fxiaoke.com/openapi_v2/common/process/approval/action.html): approval-workflow API
+- [Deep paging guide](https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html): pagination for large result sets
+- [Help center](https://help.fxiaoke.com/): end-user and admin manual
+- [Pricing](https://www.fxiaoke.com/ap/market-price/)
+- [News / blog](https://www.fxiaoke.com/crm/news/)
+
+## Auth
+
+- [OAuth 2.0 Authorization Server Metadata](https://open.fxiaoke.com/.well-known/oauth-authorization-server): RFC 8414; PKCE (S256), authorization_code + refresh_token, dynamic client registration
+
+## API Evangelist artifacts
+
+- [Authentication profile](authentication/fxiaoke-authentication.yml)
+- [API conventions](conventions/fxiaoke-conventions.yml)
+- [Error envelope](errors/fxiaoke-problem-types.yml)
+- [Standards conformance](conformance/fxiaoke-conformance.yml)
+- [Lifecycle](lifecycle/fxiaoke-lifecycle.yml)
+- [Well-known index](well-known/fxiaoke-well-known.yml)
+- [Domain security](security/fxiaoke-domain-security.yml)
+
+## Contact
+
+- Developer support: open@fxiaoke.com
+- Hotline: 400-1122-778

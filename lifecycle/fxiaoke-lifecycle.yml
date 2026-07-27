@@ -1,0 +1,23 @@
+generated: '2026-07-19'
+method: searched
+source: https://developer.fxiaoke.com/openapi_v2/
+versioning:
+  scheme: uri-path
+  current: v2
+  docs: https://developer.fxiaoke.com/openapi_v2/
+  evidence: >-
+    The current generation is Open API v2, namespaced under the /openapi_v2/
+    documentation path with V2-suffixed cgi endpoints (e.g. the OAuth token grant).
+deprecation:
+  policy_url: null
+  sunset_header: false
+  notes: No formal deprecation/sunset policy or RFC 8594 Sunset/Deprecation header support was found.
+sla:
+  url: null
+  uptime_target: null
+status_page: null
+notes: >-
+  No public status page or SLA document was located for the Fxiaoke Open API. The
+  clearest lifecycle signal is the v2 API generation and its token caching/refresh
+  contract (see conventions/ + authentication/). StatusPage and Deprecation pointers
+  are intentionally NOT emitted because neither surface was found.

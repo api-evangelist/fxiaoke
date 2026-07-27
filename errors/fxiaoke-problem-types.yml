@@ -1,0 +1,23 @@
+generated: '2026-07-19'
+method: searched
+source: https://developer.fxiaoke.com/openapi_v2/en/start/example/example.html
+format: custom-errorcode
+description: >-
+  Fxiaoke Open API v2 does not use RFC 9457 problem+json. Every response is a JSON
+  object carrying a numeric errorCode, a human-readable errorMessage, and a per-request
+  traceId. The full code registry is published as "Global Return Codes" (全局返回码) in the
+  developer documentation; this artifact captures the envelope contract rather than a
+  fabricated code list.
+envelope:
+  fields:
+  - {name: errorCode, type: integer, description: 'Return code; 0 indicates success, non-zero indicates an error.'}
+  - {name: errorMessage, type: string, description: Human-readable description of the result or error.}
+  - {name: traceId, type: string, description: Per-request trace identifier for support/correlation.}
+success_code: 0
+reference:
+  name: Global Return Codes (全局返回码)
+  docs: https://developer.fxiaoke.com/openapi_v2/
+notes: >-
+  Individual object/service reference pages (e.g. the Product object create endpoint)
+  document the errorCode/errorMessage envelope per operation. A complete enumerated
+  code table was not machine-harvested and is intentionally not fabricated here.

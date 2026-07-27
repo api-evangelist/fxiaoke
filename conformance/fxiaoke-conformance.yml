@@ -1,0 +1,36 @@
+generated: '2026-07-19'
+method: searched
+source: https://open.fxiaoke.com/.well-known/oauth-authorization-server
+standards:
+- id: oauth2
+  conforms: true
+  evidence: >-
+    RFC 8414 metadata advertises authorization_code + refresh_token grants at
+    https://open.fxiaoke.com/oauth2.0; a self-built-app client-credentials-style
+    token grant is also documented.
+- id: rfc8414-oauth-authorization-server-metadata
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server returns a valid 200 JSON metadata document
+- id: rfc7636-pkce
+  conforms: true
+  evidence: code_challenge_methods_supported = [S256]
+- id: rfc7591-dynamic-client-registration
+  conforms: true
+  evidence: registration_endpoint = https://open.fxiaoke.com/oauth2.0/register
+- id: oidc-discovery
+  conforms: partial
+  evidence: >-
+    /oauth2.0/.well-known/openid-configuration is served and id_token_signing_alg =
+    RS256, but jwks_uri returns an empty key set and no userinfo/scopes are advertised;
+    treated as an OAuth 2.1 authorization server with OIDC-shaped discovery rather than
+    a full OIDC provider.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: responses use a custom errorCode/errorMessage/traceId envelope, not application/problem+json
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: no /.well-known/security.txt on the API or docs hosts
+notes: >-
+  Standards conformance is asserted from the live RFC 8414 metadata and developer
+  documentation. No published third-party compliance/certification program (SOC 2,
+  ISO 27001, etc.) was found, so no Compliance pointer is emitted.

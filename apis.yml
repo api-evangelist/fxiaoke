@@ -1,8 +1,29 @@
 aid: fxiaoke
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/fxiaoke.png
 name: Fxiaoke
-description: 'Fxiaoke is a company surfaced as a portfolio company of dcm-ventures, qiming and added to
-  the API Evangelist network as a stub for enrichment. Sector: enterprise. This profile is a lead awaiting
-  the enrichment pipeline.'
+description: 'Fxiaoke (纷享销客 / Fenxiang) is a Chinese enterprise SaaS company providing
+  a connected, AI-driven "Agentic CRM" platform that spans marketing, sales, and customer
+  service for 6,000+ enterprise customers across manufacturing, consumer goods, healthcare,
+  and technology. Its Open API v2 platform (developer.fxiaoke.com) exposes CRM business
+  objects (accounts, contacts, leads, opportunities, products, orders) and common
+  services such as approval workflows, contact/directory sync, and business-data sync
+  over a JSON/HTTP RPC interface hosted at open.fxiaoke.com. Authentication uses a
+  self-built enterprise application (appId + appSecret + permanentCode) exchanged for
+  a corp/app access token, alongside a modern OAuth 2.1 authorization server (PKCE,
+  dynamic client registration) discoverable via RFC 8414 metadata. Backed by DCM Ventures
+  and Qiming Venture Partners.'
 url: https://raw.githubusercontent.com/api-evangelist/fxiaoke/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -13,11 +34,34 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-19'
 tags:
 - Company
 - Enterprise
-apis: []
+- CRM
+- Sales
+- Marketing
+- Customer Service
+- SaaS
+- China
+- PaaS
+apis:
+- name: Fxiaoke Open API v2
+  description: 'The Fxiaoke Open API v2 exposes CRM business objects (accounts, contacts,
+    leads, opportunities, products, orders) and common services (approval workflows,
+    directory/contact sync, business-data sync) as a JSON-over-HTTP POST RPC interface.
+    Enterprise apps authenticate with appId + appSecret + permanentCode to obtain a
+    company/app access token, then call object CRUD and query operations. Responses
+    use an errorCode / errorMessage / traceId envelope.'
+  humanURL: https://developer.fxiaoke.com/openapi_v2/
+  baseURL: https://open.fxiaoke.com
+  properties:
+  - type: Documentation
+    url: https://developer.fxiaoke.com/openapi_v2/
+  - type: APIReference
+    url: https://developer.fxiaoke.com/openapi_v2/object/CommoditiesAndProducts/ProductObj/add.html
+  - type: GettingStarted
+    url: https://developer.fxiaoke.com/openapi_v2/start/quickstart/start.html
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -26,3 +70,42 @@ maintainers:
 common:
 - type: Website
   url: http://www.fxiaoke.com/
+- type: DeveloperPortal
+  url: https://open.fxiaoke.com/
+- type: Documentation
+  url: https://developer.fxiaoke.com/openapi_v2/
+- type: APIReference
+  url: https://developer.fxiaoke.com/openapi_v2/object/CommoditiesAndProducts/ProductObj/add.html
+- type: GettingStarted
+  url: https://developer.fxiaoke.com/openapi_v2/start/quickstart/start.html
+- type: Support
+  url: https://help.fxiaoke.com/
+- type: Pricing
+  url: https://www.fxiaoke.com/ap/market-price/
+- type: Blog
+  url: https://www.fxiaoke.com/crm/news/
+- type: TermsOfService
+  url: https://www.fxiaoke.com/protocols/index.html
+- type: PrivacyPolicy
+  url: https://www.fxiaoke.com/secure/index.html
+- type: Authentication
+  url: authentication/fxiaoke-authentication.yml
+- type: Conventions
+  url: conventions/fxiaoke-conventions.yml
+- type: ErrorCatalog
+  url: errors/fxiaoke-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/fxiaoke-lifecycle.yml
+- type: WellKnown
+  url: well-known/fxiaoke-well-known.yml
+- type: Conformance
+  url: conformance/fxiaoke-conformance.yml
+- type: LLMsTxt
+  url: llms/fxiaoke-llms.txt
+- type: DomainSecurity
+  url: security/fxiaoke-domain-security.yml
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence

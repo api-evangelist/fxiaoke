@@ -1,0 +1,56 @@
+generated: '2026-07-19'
+method: searched
+source: https://developer.fxiaoke.com/openapi_v2/
+docs:
+- https://developer.fxiaoke.com/openapi_v2/en/start/example/example.html
+- https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html
+transport:
+  style: json-rpc-over-http
+  method: POST
+  content_type: application/json
+  base_host: https://open.fxiaoke.com
+  description: >-
+    Every Open API v2 operation is an HTTP POST with a JSON body to a per-object /
+    per-service path (e.g. object create/update/query and common services such as
+    approval actions). Request and response bodies are JSON.
+authentication:
+  style: token-in-body
+  description: >-
+    Calls carry the access token and tenant context (corpId, currentOpenUserId) in the
+    JSON request body rather than an Authorization header. See
+    authentication/fxiaoke-authentication.yml.
+  ref: authentication/fxiaoke-authentication.yml
+error_envelope:
+  fields:
+  - errorCode      # integer; 0 indicates success
+  - errorMessage   # human-readable message
+  - traceId        # per-request trace identifier
+  reference: Global Return Codes (全局返回码) in the Open API v2 docs
+  ref: errors/fxiaoke-problem-types.yml
+request_tracing:
+  supported: true
+  mechanism: >-
+    The token endpoint accepts a caller-supplied thirdTraceId query parameter and
+    responses echo a server traceId, enabling end-to-end request correlation.
+pagination:
+  style: cursor-deep-paging
+  documented: true
+  docs: https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html
+  description: >-
+    List/query operations support deep paging for retrieving large result sets; the
+    docs publish a dedicated deep-paging guide covering how to page past standard
+    offset limits.
+idempotency:
+  supported: false
+  notes: No idempotency-key mechanism is documented for Open API v2 write operations.
+versioning:
+  scheme: uri-path
+  current: v2
+  evidence: /openapi_v2/ documentation namespace and V2-suffixed cgi paths
+  ref: lifecycle/fxiaoke-lifecycle.yml
+rate_limiting:
+  documented: unknown
+  notes: >-
+    The developer docs reference call-frequency guidance but no explicit numeric
+    per-app rate-limit table was captured; token caching guidance (min 6600s) is the
+    clearest published throttling-adjacent contract.

@@ -1,0 +1,41 @@
+generated: '2026-07-19'
+method: searched
+source: live probes of /.well-known/* on Fxiaoke API + docs hosts
+hosts:
+- host: https://open.fxiaoke.com
+  documents:
+  - path: /.well-known/oauth-authorization-server   # RFC 8414
+    status: 200
+    file: fxiaoke-oauth-authorization-server.json
+  - path: /oauth2.0/.well-known/openid-configuration  # OIDC discovery (issuer-scoped)
+    status: 200
+    file: fxiaoke-openid-configuration.json
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /llms.txt
+    status: 404
+- host: https://developer.fxiaoke.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /llms.txt
+    status: 404
+notes: >-
+  open.fxiaoke.com publishes a genuine RFC 8414 OAuth 2.0 Authorization Server
+  Metadata document (issuer https://open.fxiaoke.com/oauth2.0) advertising a PKCE
+  (S256) authorization_code + refresh_token flow and an RFC 7591 dynamic client
+  registration endpoint. The same JSON is served at the issuer-scoped
+  /oauth2.0/.well-known/openid-configuration path. jwks_uri returns an empty key
+  set ({"keys":[]}) at probe time. www.fxiaoke.com returns HTTP 200 for arbitrary
+  /.well-known/* and /llms.txt paths (soft-404 catch-all) and is therefore NOT
+  treated as publishing these documents.
