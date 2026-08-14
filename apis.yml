@@ -1,16 +1,23 @@
 aid: fxiaoke
 accessModel:
-  pricing: unknown
-  onboarding: self-serve
-  trial: false
+  pricing: paid
+  onboarding: sales-assisted
+  trial: true
   try_now: false
   public: false
-  label: Self-serve signup
-  confidence: medium
+  label: Paid seats with a free trial; API metered by a purchased quota pack
+  confidence: high
   source:
   - authentication
-  generated: '2026-07-22'
-  method: derived
+  - https://www.fxiaoke.com/ap/market-price/
+  - https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+  note: >-
+    Seat pricing is published (CNY 119 and CNY 220 per user per month, 12-month minimum)
+    and both tiers offer a free trial. API access itself is NOT self-serve: a tenant with
+    no purchased Open API resource pack receives errorCode 30003 on every call, and the
+    pack price is "contact customer service".
+  generated: '2026-08-13'
+  method: searched
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/fxiaoke.png
 name: Fxiaoke
 description: 'Fxiaoke (纷享销客 / Fenxiang) is a Chinese enterprise SaaS company providing
@@ -34,7 +41,7 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-19'
+modified: '2026-08-13'
 tags:
 - Company
 - Enterprise
@@ -104,8 +111,38 @@ common:
   url: llms/fxiaoke-llms.txt
 - type: DomainSecurity
   url: security/fxiaoke-domain-security.yml
+- type: SignUp
+  url: https://www.fxiaoke.com/ap/reg/
+- type: Login
+  url: https://www.fxiaoke.com/XV/User/Login
+- type: HelpCenter
+  url: https://help.fxiaoke.com/
+- type: Packages
+  url: packages/fxiaoke-packages.yml
+- type: SDKs
+  url: packages/fxiaoke-packages.yml
+- type: Components
+  url: components/fxiaoke-components.yml
+- type: RateLimits
+  url: rate-limits/fxiaoke-rate-limits.yml
+- type: Plans
+  url: plans/fxiaoke-plans-pricing.yml
+- type: DataModel
+  url: data-model/fxiaoke-data-model.yml
+- type: TrustCenter
+  url: security/fxiaoke-trust-center.yml
+- type: Compliance
+  url: security/fxiaoke-trust-center.yml
+# NOT emitted, deliberately — the artifact exists but records a measured ABSENCE:
+#   MCPServer      -> mcp/fxiaoke-mcp.yml         deployment.mode = none; no server published
+#   OAuthScopes    -> scopes/fxiaoke-scopes.yml   scope_count = 0; no scope registry published
+#   AgentCard      -> nothing written; no card on any host
+#   SecurityTxt / Security -> no RFC 9116 file and no vulnerability disclosure program
+#   StatusPage / Deprecation -> no status page, no deprecation policy
+#   Idempotency    -> conventions records idempotency.supported = false
+#   AsyncAPI / Webhooks -> no event surface exists
 x-enrichment:
-  date: '2026-07-19'
-  status: backfilled
+  date: '2026-08-13'
+  status: enriched
+  artifacts_added: 8
   pass: local-v1
-  note: backfilled from .gitignore signal + verified work evidence
