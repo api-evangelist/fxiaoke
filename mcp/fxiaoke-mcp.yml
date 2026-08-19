@@ -1,0 +1,110 @@
+generated: '2026-08-13'
+method: probed
+source: >-
+  Direct probes of every Fxiaoke API/docs host for an MCP endpoint, plus registry and
+  documentation searches for a published stdio server.
+status: none
+summary: >-
+  Fxiaoke publishes no MCP server — neither a remote endpoint nor a local stdio package.
+  Nothing is derived here: with no OpenAPI to bind tools to, a candidate tool list would
+  be invented rather than computed, so this artifact records the probe result only.
+
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: unknown
+  verified: probed
+
+probes:
+- url: https://open.fxiaoke.com/mcp
+  method: POST tools/list
+  http_status: 302
+  result: >-
+    Tengine trailing-slash redirect to /mcp/ only. NOT an MCP server — following the
+    redirect lands on a Tengine 404 page.
+- url: https://open.fxiaoke.com/mcp/
+  method: POST tools/list
+  http_status: 404
+  result: Tengine 404 HTML.
+- url: https://open.fxiaoke.com/sse
+  method: POST tools/list
+  http_status: 404
+  result: Tengine 404 HTML.
+- url: https://open.fxiaoke.com/oauth2.0/mcp
+  method: POST tools/list
+  http_status: 200
+  result: >-
+    FALSE POSITIVE. Returns HTTP 200 with application/json, but the body is the API
+    gateway's own error envelope — {"errorCode":10006,"errorMessage":"the request
+    uri=[/oauth2.0/mcp],apiName=[null] is not exists"}. Not JSON-RPC, no result, no
+    tools.
+- url: https://open.fxiaoke.com/.well-known/mcp.json
+  method: POST tools/list
+  http_status: 200
+  result: >-
+    FALSE POSITIVE, same errorCode 10006 gateway envelope. A GET on the same path
+    returns a real Tengine 404.
+- url: https://open.fxiaoke.com/cgi/mcp
+  method: POST tools/list
+  http_status: 404
+  result: Tengine 404 HTML.
+- url: https://open.fxiaoke.com/api/mcp
+  method: POST tools/list
+  http_status: 404
+  result: Tengine 404 HTML.
+- url: https://open.fxiaoke.com/v1/mcp
+  method: POST tools/list
+  http_status: 404
+  result: Tengine 404 HTML.
+- url: https://mcp.fxiaoke.com/mcp
+  method: POST tools/list
+  http_status: 000
+  result: Host does not resolve / no TLS listener.
+- url: https://open.fxiaoke.com/.well-known/oauth-protected-resource
+  method: GET
+  http_status: 200
+  result: >-
+    Same errorCode 10006 gateway envelope, not an RFC 9728 protected-resource metadata
+    document. Fxiaoke therefore does NOT publish the resource-server half of the MCP
+    OAuth profile.
+
+soft_200_warning: >-
+  open.fxiaoke.com answers HTTP 200 with a JSON body for ANY unrecognised POST path,
+  carrying errorCode 10006 "the request uri=[...] is not exists". Any probe that scores
+  a 200 plus application/json as an MCP hit would falsely credit Fxiaoke with an agent
+  surface it does not have. The presence check must parse the body for a JSON-RPC
+  result, not trust the status line or content type.
+
+oauth_context:
+  note: >-
+    Fxiaoke DOES serve RFC 8414 authorization-server metadata at
+    https://open.fxiaoke.com/.well-known/oauth-authorization-server advertising PKCE
+    (S256), RFC 7591 dynamic client registration and token_endpoint_auth_methods_supported
+    ["none"] — the exact shape an MCP client's OAuth flow expects, and endpoints named
+    /oauth2.0/cli/authorize and /oauth2.0/pkce/token that are distinct from the
+    documented developer OAuth endpoints. The authorization half of an agent-facing
+    surface is in place; the resource half (an MCP endpoint, or oauth-protected-resource
+    metadata) is not. jwks_uri returns an empty key set.
+  metadata: well-known/fxiaoke-oauth-authorization-server.json
+
+searched:
+  npm: no @fxiaoke or fxiaoke MCP package (registry search returned 5 unrelated packages)
+  pypi: no fxiaoke package
+  github: no first-party organization; no MCP repository among community forks
+  docs: >-
+    The Open API v2 developer manual (four sections — quickstart, business objects,
+    common services, FAQ, last revised 2026-01-16) contains no MCP, agent or tool-calling
+    section.
+
+derived_candidate: false
+derived_reason: >-
+  No OpenAPI, Swagger, GraphQL SDL or AsyncAPI document exists for this provider, so
+  there are no operationIds to bind candidate tools to. Enumerating tools from the 1,080+
+  hand-written HTML reference pages would be authoring an interface on the provider's
+  behalf, which this pipeline does not do.
+
+ref:
+  well_known: well-known/fxiaoke-well-known.yml
+  authentication: authentication/fxiaoke-authentication.yml

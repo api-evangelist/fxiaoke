@@ -1,41 +1,185 @@
-generated: '2026-07-19'
-method: searched
-source: live probes of /.well-known/* on Fxiaoke API + docs hosts
+generated: '2026-08-13'
+method: probed
+source: live probes of /.well-known/* on every Fxiaoke API, docs and corporate host
+probed: '2026-08-13'
+summary:
+  hosts_probed: 9
+  real_documents: 6
+  document_types: [oauth-authorization-server, openid-configuration]
+
 hosts:
 - host: https://open.fxiaoke.com
+  role: primary API host (纷享云)
   documents:
   - path: /.well-known/oauth-authorization-server   # RFC 8414
     status: 200
     file: fxiaoke-oauth-authorization-server.json
-  - path: /oauth2.0/.well-known/openid-configuration  # OIDC discovery (issuer-scoped)
+    real: true
+  - path: /oauth2.0/.well-known/openid-configuration  # OIDC discovery, issuer-scoped
     status: 200
     file: fxiaoke-openid-configuration.json
+    real: true
   - path: /.well-known/openid-configuration
-    status: 404
+    status: 405
+    real: false
   - path: /.well-known/security.txt
+    status: 405
+    real: false
+  - path: /security.txt
     status: 404
+    real: false
   - path: /.well-known/api-catalog
-    status: 404
+    status: 405
+    real: false
   - path: /.well-known/ai-plugin.json
     status: 404
+    real: false
+  - path: /.well-known/agent-card.json
+    status: 405
+    real: false
+  - path: /.well-known/agent.json
+    status: 404
+    real: false
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    real: false
+    note: >-
+      SOFT-200. Returns application/json but the body is the API gateway's own error
+      envelope — {"errorCode":10006,"errorMessage":"the request uri=[...] is not
+      exists"} — not RFC 9728 protected-resource metadata. Counted as a miss.
+  - path: /.well-known/mcp.json
+    status: 200
+    real: false
+    note: Same errorCode 10006 gateway envelope on POST; a GET returns a real 404.
   - path: /llms.txt
     status: 404
+    real: false
+
+- host: https://open-hwcloud.fxiaoke.com
+  role: regional API host (华为云 / Huawei Cloud)
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    real: true
+    issuer: https://open-hwcloud.fxiaoke.com/oauth2.0
+
+- host: https://open-ale.fxiaoke.com
+  role: regional API host (阿里云 / Alibaba Cloud)
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    real: true
+    issuer: https://open-ale.fxiaoke.com/oauth2.0
+
+- host: https://open-hws.fxiaoke.com
+  role: regional API host (法兰克福 / Frankfurt)
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    real: true
+    issuer: https://open-hws.fxiaoke.com/oauth2.0
+  - path: /.well-known/security.txt
+    status: 405
+    real: false
+  - path: /llms.txt
+    status: 405
+    real: false
+
+- host: https://open-na.sharecrm.com
+  role: regional API host (北美云 / North America)
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    real: true
+    issuer: https://open-na.sharecrm.com/oauth2.0
+  - path: /.well-known/security.txt
+    status: 405
+    real: false
+  - path: /llms.txt
+    status: 405
+    real: false
+
+- host: https://open-ksc.sharecrm.com
+  role: regional API host (香港华为 / Hong Kong)
+  documents: []
+  note: >-
+    Host did not complete a TLS connection from our probe location (curl exit, status
+    000). Not recorded as an absence — recorded as unreachable from here.
+
 - host: https://developer.fxiaoke.com
+  role: developer documentation (VuePress 2 static site)
   documents:
   - path: /.well-known/security.txt
     status: 404
+    real: false
+  - path: /security.txt
+    status: 404
+    real: false
   - path: /.well-known/openid-configuration
     status: 404
+    real: false
   - path: /.well-known/oauth-authorization-server
     status: 404
+    real: false
+  - path: /.well-known/api-catalog
+    status: 404
+    real: false
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    real: false
+  - path: /.well-known/agent-card.json
+    status: 404
+    real: false
+  - path: /.well-known/agent.json
+    status: 404
+    real: false
   - path: /llms.txt
     status: 404
+    real: false
+  - path: /robots.txt
+    status: 404
+    real: false
+  - path: /sitemap.xml
+    status: 404
+    real: false
+
+- host: https://www.fxiaoke.com
+  role: corporate site (SPA)
+  documents: []
+  note: >-
+    SOFT-404 CATCH-ALL. www.fxiaoke.com answers HTTP 200 with an identical 10,851-byte
+    SPA shell for EVERY unmatched path — /openapi.json, /swagger.json, /llms.txt,
+    /.well-known/agent-card.json, /.well-known/agent.json, /api-docs and /redoc all
+    return the same HTML. Nothing on this host may be counted as a served document. A
+    probe that trusts status codes alone would falsely credit this provider with an
+    OpenAPI, an llms.txt AND an agent card.
+
+- host: https://fxiaoke.statuspage.io
+  role: status page candidate
+  documents: []
+  note: >-
+    FALSE POSITIVE. HTTP 200 after redirecting to
+    https://www.atlassian.com/software/statuspage — the Statuspage marketing site, not a
+    Fxiaoke tenant. See lifecycle/fxiaoke-lifecycle.yml.
+
+findings:
+  oauth_metadata_is_regional: >-
+    Every reachable regional cloud host serves its OWN RFC 8414 metadata document with a
+    host-scoped issuer, authorization endpoint, token endpoint, JWKS and dynamic
+    registration endpoint. This is a genuinely good multi-region discovery posture and
+    the strongest machine-readable surface Fxiaoke publishes.
+  jwks_empty: >-
+    Every jwks_uri probed returns {"keys":[]}, so the RS256 id_token the metadata
+    advertises cannot be verified by a client that follows discovery.
+  no_security_txt: >-
+    No RFC 9116 security.txt on any host. No SecurityTxt pointer is emitted.
+  no_agent_card: >-
+    No A2A agent card on any host. The only 200s came from the www SPA catch-all and are
+    HTML, not AgentCard JSON. Nothing is written to a2a/ and no AgentCard pointer is
+    emitted.
+
 notes: >-
-  open.fxiaoke.com publishes a genuine RFC 8414 OAuth 2.0 Authorization Server
-  Metadata document (issuer https://open.fxiaoke.com/oauth2.0) advertising a PKCE
-  (S256) authorization_code + refresh_token flow and an RFC 7591 dynamic client
-  registration endpoint. The same JSON is served at the issuer-scoped
-  /oauth2.0/.well-known/openid-configuration path. jwks_uri returns an empty key
-  set ({"keys":[]}) at probe time. www.fxiaoke.com returns HTTP 200 for arbitrary
-  /.well-known/* and /llms.txt paths (soft-404 catch-all) and is therefore NOT
-  treated as publishing these documents.
+  A WellKnown pointer IS emitted, because at least one path on the provider's own hosts
+  returns a real, parsing document — the RFC 8414 metadata, confirmed on five separate
+  hosts. SecurityTxt, AgentCard and LLMsTxt (searched) pointers are NOT emitted, because
+  every candidate for those either 404d or returned an HTML/SPA shell.

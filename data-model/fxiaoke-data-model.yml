@@ -1,0 +1,131 @@
+generated: '2026-08-13'
+method: searched
+source: https://developer.fxiaoke.com/openapi_v2/object/CommoditiesAndProducts/ProductObj/add.html
+docs:
+- https://developer.fxiaoke.com/openapi_v2/common/system/object-describe/describe.html
+- https://developer.fxiaoke.com/openapi_v2/common/system/object-describe/list.html
+- https://developer.fxiaoke.com/openapi_v2/start/guide/param.html
+summary: >-
+  Fxiaoke's data model is METADATA-DRIVEN, not statically published. The API exposes CRM
+  business objects addressed by an apiName (AccountObj, ProductObj,
+  erpSalesOrderObj, ...) and the authoritative field list for any object is retrieved at
+  runtime from the object-describe endpoints — not from a schema document. This artifact
+  therefore records the object DOMAINS the reference documents and the discovery
+  mechanism, and deliberately does not enumerate fields or relationships that would have
+  to be invented: no OpenAPI, JSON Schema or ERD is published.
+
+discovery:
+  mechanism: runtime object-describe
+  endpoints:
+  - name: 查询对象描述 (describe object)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/system/object-describe/describe.html
+    returns: data.describe (business object description) -> data.describe.fields (field collection)
+  - name: 对象列表 (list objects)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/system/object-describe/list.html
+  field_shape:
+    path: data -> describe -> fields -> <fieldApiName> -> type
+    note: >-
+      Each field carries a "type" and the value-formatting guide maps each type to the
+      format a write must supply. Custom objects and custom fields created by a tenant
+      appear through the same mechanism, so the effective schema is per-tenant.
+    docs: https://developer.fxiaoke.com/openapi_v2/start/guide/param.html
+  admin_alternative: Administrators can read the field list from the CRM admin console.
+
+identifiers:
+  primary_key: _id
+  format: 32-character lowercase hex (observed in the deep-paging worked example)
+  ordering: >-
+    _id is sortable and is the documented keyset-pagination key — order by _id ascending
+    and filter _id GT the last value seen.
+  tenant: corpId, prefix FSCID_
+  application: appId, prefix FSAID_
+  user: openUserId / 员工ID
+  object_reference: >-
+    Objects are referenced by apiName strings (e.g. dataObjectApiName: "AccountObj").
+    Foreign-key style fields follow a <entity>_id convention — observed in the published
+    ERP payload example: product_id, order_account_id.
+
+query_contract:
+  request_object: search_query_info
+  fields: [limit, offset, filters, orders, fieldProjection]
+  filter_shape: '{operator, field_name, field_values[]}'
+  operators_observed: [GT]
+  order_shape: '{fieldName, isAsc}'
+  total_opt_in: find_explicit_total_num
+  source: https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html
+
+master_detail:
+  supported: true
+  evidence: >-
+    Sync payloads carry masterFieldVal (the master object) and detailFieldVals (a map of
+    detail-object apiName -> array of detail rows), e.g. erpSalesOrderObj with
+    erpSalesOrderProductObj children. This is the platform's has_many representation.
+  source: https://developer.fxiaoke.com/openapi_v2/common/system/other/ERP/push.html
+
+object_domains:
+  count: 41
+  note: >-
+    The 业务对象接口 section of the reference is organised into 41 business domains
+    spanning 1,080+ operation pages. Domain names are transcribed from the published
+    navigation; individual object apiNames within each domain are NOT enumerated here
+    because they are tenant-extensible and must be read from object-describe.
+  domains:
+  - {id: CustomersAndContacts, name: 客户与联系人}
+  - {id: OpportunitiesAndLeads, name: 商机与线索}
+  - {id: CommoditiesAndProducts, name: 商品与产品}
+  - {id: SalesAndOrders, name: 销售与订单}
+  - {id: QuotationsAndPricing, name: 报价与价格}
+  - {id: ContractManagement, name: 合同管理}
+  - {id: FinanceAndPaymentCollection, name: 财务与回款}
+  - {id: InvoicingAndSettlement, name: 开票与结算}
+  - {id: RefundManagement, name: 退款管理}
+  - {id: RebateManagement, name: 返利管理}
+  - {id: PromotionManagement, name: 促销管理}
+  - {id: CouponManagement, name: 优惠券管理}
+  - {id: MembershipManagement, name: 会员管理}
+  - {id: MarketingAndActivities, name: 市场与活动}
+  - {id: BehaviorAndVisitors, name: 行为与访客}
+  - {id: CommunicationAndRecords, name: 沟通与记录}
+  - {id: ApprovalAndBusiness, name: 审批与业务}
+  - {id: ProjectManagement, name: 项目管理}
+  - {id: WorkOrdersAndServices, name: 工单与服务}
+  - {id: FieldServiceManagement, name: 现场服务管理}
+  - {id: ServiceSkills, name: 服务技能}
+  - {id: SparePartsManagement, name: 备件管理}
+  - {id: DevicesAndAssets, name: 设备与资产}
+  - {id: InventoryAndWarehousing, name: 库存与仓储}
+  - {id: StockCountingAndTransfers, name: 盘点与调拨}
+  - {id: PersonalWarehouseManagement, name: 个人仓管理}
+  - {id: BatchAndSerialNumbers, name: 批次与序列号}
+  - {id: MaterialIssueAndReturns, name: 物料出入库}
+  - {id: LogisticsAndShipment, name: 物流与发货}
+  - {id: PurchasingManagement, name: 采购管理}
+  - {id: SupplierManagement, name: 供应商管理}
+  - {id: ProductConstraintsAndAttributes, name: 产品约束与属性}
+  - {id: OrganizationAndPersonnel, name: 组织与人员}
+  - {id: SchedulesAndJournals, name: 日程与日志}
+  - {id: TargetRules, name: 目标规则}
+  - {id: StagePropeller, name: 阶段推进器}
+  - {id: KnowledgeAndContent, name: 知识与内容}
+  - {id: EnterpriseLibrary, name: 企业库}
+  - {id: InterconnectedEnterprise, name: 互联企业}
+  - {id: WechatEcosystem, name: 微信生态}
+  - {id: CustomCapabilities, name: 自定义能力}
+
+relationships: []
+relationships_note: >-
+  Deliberately empty. Deriving an entity-relationship graph requires either $ref links
+  in an OpenAPI document or a published object reference listing each object's lookup
+  fields; Fxiaoke publishes neither. The only relationship evidence on the public surface
+  is the master/detail pattern above and <entity>_id field naming in worked examples.
+  Inventing has_one/has_many edges from domain names would be fabrication.
+
+gaps:
+- No OpenAPI, JSON Schema or JSON Structure document for any object
+- No published object catalog with apiNames — objects are discovered per tenant at runtime
+- No field-type reference in machine-readable form
+- No relationship/ERD documentation
+
+ref:
+  conventions: conventions/fxiaoke-conventions.yml
+  errors: errors/fxiaoke-problem-types.yml

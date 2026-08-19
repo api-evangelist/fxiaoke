@@ -1,28 +1,44 @@
-generated: '2026-07-19'
+generated: '2026-08-13'
 method: searched
-source: https://developer.fxiaoke.com/openapi_v2/en/start/auth/app-info.html
-docs: https://developer.fxiaoke.com/openapi_v2/en/start/quickstart/start.html
+source: https://developer.fxiaoke.com/openapi_v2/start/auth/app-info.html
+docs:
+- https://developer.fxiaoke.com/openapi_v2/start/auth/app-info.html
+- https://developer.fxiaoke.com/openapi_v2/start/auth/auth-code.html
+- https://developer.fxiaoke.com/openapi_v2/start/auth/refresh.html
+- https://developer.fxiaoke.com/openapi_v2/start/example/public.html
+- https://developer.fxiaoke.com/openapi_v2/start/example/old.html
+- https://open.fxiaoke.com/.well-known/oauth-authorization-server
 summary:
   types: [oauth2, custom-token]
-  api_key_in: [body]
+  api_key_in: [header, body]
   oauth2_flows: [clientCredentials, authorizationCode]
   base_host: https://open.fxiaoke.com
+  surfaces: 2
+  note: >-
+    Fxiaoke runs TWO distinct OAuth surfaces that do not share endpoints or parameter
+    names — the documented developer flow under /oauth2.0/{authorize,token}, and an
+    undocumented RFC 8414-conformant PKCE server whose metadata advertises
+    /oauth2.0/cli/authorize and /oauth2.0/pkce/token. Only the first is described in the
+    developer manual.
+
 schemes:
 - name: enterprise-app-token
   type: oauth2
   flow: clientCredentials
+  documented: true
   description: >-
-    Self-built enterprise application flow. A tenant creates a self-built app in the
-    Fxiaoke admin console (developer mode) and receives appId, appSecret, and a
-    permanentCode. These are exchanged for a short-lived access token (called
-    corpAccessToken / app access token) that authenticates all subsequent Open API v2
-    calls.
+    客户端凭证模式. A tenant creates a self-built app in the Fxiaoke admin console with
+    developer mode enabled and receives appId, appSecret and permanentCode. These are
+    exchanged for a short-lived corpAccessToken that authenticates all subsequent Open
+    API v2 calls. The mode supports acting as any employee by supplying their ID.
   token_endpoint: https://open.fxiaoke.com/oauth2.0/token
+  token_endpoint_legacy: https://open.fxiaoke.com/cgi/corpAccessToken/get/V2
   token_query_params:
-  - thirdTraceId   # caller-supplied random trace string
+  - thirdTraceId   # caller-supplied UUIDv4, required, must be unique per request
   request:
     content_type: application/json
     method: POST
+    headers: none — the token call is the one endpoint that sends no auth headers
     fields:
     - {name: appId, required: true}
     - {name: appSecret, required: true}
@@ -31,38 +47,146 @@ schemes:
   response_fields:
   - accessToken
   - expiresIn
-  - openUserId
+  - openUserId    # carries the enterprise openCorpId in this flow
   - appId
-  - ea            # enterprise account
+  - ea            # enterprise account, becomes the x-fs-ea header
   - errorCode
   - errorMessage
   - traceId
   token_lifetime_seconds: 7200
   caching_guidance: >-
-    Token is valid for 2 hours (7200s). Callers must cache it for at least 6600s and
-    refresh by re-calling the token endpoint between 6650s and 7200s; the token
-    expires at 7200s.
+    Calling within the first 6600s returns the SAME token; calling between 6600s and
+    7200s issues a NEW token while the old one stays valid until 7200s. The documented
+    contract is therefore: cache for 6600s, refresh in the 6600–7200s window, and key
+    retry logic off errorCode 20016.
+  endpoint_limits:
+    rate: 10 calls per minute
+    concurrency: not permitted (不能并发调用本接口)
+  ref: rate-limits/fxiaoke-rate-limits.yml
+
+- name: authorization-code
+  type: oauth2
+  flow: authorizationCode
+  documented: true
+  description: >-
+    授权码模式, for web applications with a backend that need to act as an end user. The
+    user is redirected to Fxiaoke, authorizes, and the app exchanges the returned code
+    for an access token plus a refresh token.
+  authorization_endpoint: https://open.fxiaoke.com/oauth2.0/authorize
+  token_endpoint: https://open.fxiaoke.com/oauth2.0/token
+  authorize_params:
+  - {name: appId, required: true, standard_name: client_id}
+  - {name: redirectUrl, required: true, standard_name: redirect_uri}
+  - {name: responseType, required: true, value: code, standard_name: response_type}
+  - {name: state, required: true}
+  - {name: thirdTraceId, required: true, standard_name: null}
+  token_params:
+  - {name: appId, required: true}
+  - {name: appSecret, required: true}
+  - {name: redirectUrl, required: true}
+  - {name: code, required: true}
+  - {name: grantType, required: true, value: authorization_code}
+  response_fields: [openUserId, accessToken, corpId, expiresIn, refreshToken, errorCode, errorMessage]
+  access_token_lifetime_seconds: 7200
+  refresh_token_lifetime: 2 months
+  pkce: false
+  csrf: >-
+    state is mandatory and the docs require the app to verify it on callback, with a
+    recommended construction of MD5(timestamp + account).
+  redirect_uri_binding: >-
+    The redirectUrl domain must match the login-authorization domain registered on the
+    app detail page.
+  spec_deviation: >-
+    Parameter names are camelCase Fxiaoke names, not RFC 6749 names — appId not
+    client_id, redirectUrl not redirect_uri, responseType not response_type, grantType
+    not grant_type. A standards-compliant OAuth client library cannot drive this flow
+    without custom parameter mapping. The token exchange also sends appSecret in a JSON
+    body rather than using a documented client authentication method.
+
 - name: oauth2.1-pkce
   type: oauth2
   flow: authorizationCode
+  documented: false
   description: >-
-    Modern OAuth 2.1 authorization server discoverable via RFC 8414 metadata at
-    https://open.fxiaoke.com/.well-known/oauth-authorization-server. Public clients
-    (token_endpoint_auth_methods = none) use PKCE (S256) with authorization_code and
-    refresh_token grants, and may self-register via the RFC 7591 dynamic client
-    registration endpoint.
+    An RFC 8414-conformant authorization server advertised at
+    https://open.fxiaoke.com/.well-known/oauth-authorization-server but absent from the
+    developer manual. Public clients (token_endpoint_auth_methods_supported ["none"])
+    use PKCE S256 with authorization_code and refresh_token grants and may self-register
+    through the RFC 7591 dynamic client registration endpoint. The "cli" and "pkce" path
+    segments and the anonymous-client posture are the shape a CLI or agent client
+    expects.
   issuer: https://open.fxiaoke.com/oauth2.0
   authorization_endpoint: https://open.fxiaoke.com/oauth2.0/cli/authorize
   token_endpoint: https://open.fxiaoke.com/oauth2.0/pkce/token
   registration_endpoint: https://open.fxiaoke.com/oauth2.0/register
   jwks_uri: https://open.fxiaoke.com/oauth2.0/jwks
   grant_types: [authorization_code, refresh_token]
+  response_types: [code]
   code_challenge_methods: [S256]
   token_endpoint_auth_methods: [none]
+  subject_types: [public]
   id_token_signing_alg: [RS256]
+  scopes_supported: null
+  caveats:
+  - >-
+    jwks_uri returns an empty key set ({"keys":[]}) as of 2026-08-13, so an RS256
+    id_token cannot be verified by any client following discovery.
+  - >-
+    No matching RFC 9728 oauth-protected-resource metadata is served — the path returns
+    the gateway's errorCode 10006 envelope — so there is no advertised resource server
+    for these tokens.
+  - No scopes_supported is advertised and no scope registry is published anywhere.
+  probed: '2026-08-13'
+  evidence: well-known/fxiaoke-oauth-authorization-server.json
+
+- name: jsapi-ticket-signature
+  type: custom-signature
+  documented: true
+  description: >-
+    Client-side JS API calls are authorized by a sha1 signature rather than a bearer
+    token. A jsapi_ticket (7200s lifetime) is fetched server-side with the
+    corpAccessToken, then signed together with a nonce, timestamp and the page URL.
+  ticket_endpoint: https://open.fxiaoke.com/cgi/jsApiTicket/get
+  ticket_request_fields: [corpAccessToken, corpId]
+  ticket_response_fields: [ticket, expiresIn, errorCode, errorMessage]
+  signature_algorithm: >-
+    sha1 of the ASCII-sorted key=value string built from noncestr, jsapi_ticket,
+    timestamp and url (fragment removed); result uppercased hex.
+  ref: components/fxiaoke-components.yml
+
+token_transport:
+  current:
+    style: header
+    headers:
+    - {name: authorization, value: 'Bearer <token>'}
+    - {name: x-fs-ea, value: enterprise account from the token response}
+    - {name: x-fs-userid, value: acting employee CRM ID}
+    source: https://developer.fxiaoke.com/openapi_v2/start/example/public.html
+  legacy:
+    style: body
+    fields: [corpAccessToken, currentOpenUserId, corpId]
+    source: https://developer.fxiaoke.com/openapi_v2/start/example/old.html
+    note: Still documented and functional; no sunset date published.
+
+multi_tenancy:
+  tenant_identifier: corpId (FSCID_*) / ea
+  actor_identifier: openUserId, or x-fs-userid under the current convention
+  app_identifier: appId (FSAID_*)
+  authorization_model: >-
+    Per-app, per-enterprise grants administered by the tenant. Denials surface as
+    errorCode 15003, 20014, 20020, 20021, 20022 and 20023 rather than HTTP 403.
+
+scopes:
+  published: false
+  note: >-
+    A scope parameter exists (errorCodes 10006 and 11006 reference it) but no scope
+    values, permission catalog or consent screen inventory is published, and the RFC
+    8414 metadata omits scopes_supported. See scopes/fxiaoke-scopes.yml.
+
 notes: >-
-  Open API v2 calls carry the token plus tenant context (corpId / currentOpenUserId
-  derived from openUserId) in the JSON request body rather than an Authorization
-  header. No OpenAPI/Swagger definition is published, so this profile was captured
-  from the developer documentation and the live RFC 8414 metadata rather than derived
-  from a spec.
+  No OpenAPI/Swagger definition is published, so this profile was captured from the
+  developer documentation and live RFC 8414 metadata rather than derived from a spec.
+  The strongest auth signal is clarity: two documented grant types with complete
+  parameter tables, explicit token lifetimes and explicit caching guidance. The
+  weaknesses are non-standard parameter naming, an empty JWKS, no scope registry, and
+  the fact that every auth failure arrives as HTTP 200 with a non-zero errorCode.

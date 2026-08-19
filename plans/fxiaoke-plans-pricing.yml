@@ -1,0 +1,91 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.fxiaoke.com/ap/market-price/
+docs:
+- https://www.fxiaoke.com/ap/market-price/
+- https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+currency: CNY
+plan_count: 3
+billing_note: >-
+  Fxiaoke prices the CRM seat, not the API. The published tiers are per-user
+  subscriptions with a 12-month minimum term; API access is metered separately through
+  a purchasable Open API call-quota pack whose price the pricing page does not publish.
+
+plans:
+- name: 专业版
+  name_en: Professional Edition
+  price: 119
+  currency: CNY
+  period: per user per month
+  minimum_term: 12 months
+  includes:
+  - 办公协同管理 — office collaboration management
+  - 销售过程管理 — sales process management
+  - 基础营销功能 — basic marketing
+  - 标准数据分析 — standard analytics
+  - 基础 PaaS 能力 — basic PaaS capability
+  trial: true
+  api_access: not stated on the pricing page
+
+- name: 旗舰版
+  name_en: Flagship Edition
+  price: 220
+  currency: CNY
+  period: per user per month
+  minimum_term: 12 months
+  popular: true
+  includes:
+  - 办公协同管理 — office collaboration management
+  - 可定制销售过程 — customizable sales process
+  - 多语言环境 — multi-language environment
+  - 商业智能分析 — business intelligence analytics
+  - 高级 PaaS 能力 — advanced PaaS capability
+  trial: true
+  api_access: not stated on the pricing page
+
+- name: 定制报价
+  name_en: Custom / Contact Sales
+  price: null
+  currency: CNY
+  period: null
+  includes:
+  - Quote built from enterprise requirements
+  - Seat-count expansion on demand
+  - Per-feature product selection
+  trial: false
+  note: Enterprise tier, price on application.
+
+add_ons:
+- name: Open API 资源包
+  name_en: Open API call-quota pack
+  quota: 100000
+  quota_unit: API calls per day
+  price: null
+  stackable: true
+  source: https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+  note: >-
+    The rate-limit guide names a 100,000-call Open API resource pack and says packs
+    stack additively, but publishes no price — "具体的付费策略，请咨询纷享客服" (contact customer
+    service for the payment policy). A tenant that has not bought a pack gets errorCode
+    30003 on every call, so the API is gated behind a purchase that carries no public
+    price.
+
+- name: 独立库
+  name_en: Dedicated database
+  price: null
+  source: https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+  note: >-
+    Named as the upgrade path for raising the 100-calls/20-seconds per-interface burst
+    limit. No public price.
+
+api_pricing_transparency:
+  seat_price_published: true
+  api_quota_price_published: false
+  note: >-
+    Commercial clarity is split. Seat pricing is fully public with real numbers; the
+    cost of the API itself is not — both the call-quota pack and the dedicated-database
+    upgrade are "contact sales". A developer cannot determine what the Open API costs
+    without a sales conversation.
+
+ref:
+  rate_limits: rate-limits/fxiaoke-rate-limits.yml

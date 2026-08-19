@@ -1,23 +1,336 @@
-generated: '2026-07-19'
+generated: '2026-08-13'
 method: searched
-source: https://developer.fxiaoke.com/openapi_v2/en/start/example/example.html
+source: https://developer.fxiaoke.com/openapi_v2/start/guide/codes.html
+docs:
+- https://developer.fxiaoke.com/openapi_v2/start/guide/codes.html
+- https://developer.fxiaoke.com/openapi_v2/start/example/example.html
+- https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html
 format: custom-errorcode
+rfc9457: false
 description: >-
-  Fxiaoke Open API v2 does not use RFC 9457 problem+json. Every response is a JSON
-  object carrying a numeric errorCode, a human-readable errorMessage, and a per-request
-  traceId. The full code registry is published as "Global Return Codes" (全局返回码) in the
-  developer documentation; this artifact captures the envelope contract rather than a
-  fabricated code list.
+  Fxiaoke Open API v2 does not use RFC 9457 problem+json. Every response is a JSON object
+  carrying a numeric errorCode, a human-readable errorMessage, an optional
+  errorDescription, and a per-request traceId. The complete registry is published as
+  "全局返回码" (Global Return Codes) in the developer manual and is transcribed in full below.
+
 envelope:
   fields:
-  - {name: errorCode, type: integer, description: 'Return code; 0 indicates success, non-zero indicates an error.'}
-  - {name: errorMessage, type: string, description: Human-readable description of the result or error.}
-  - {name: traceId, type: string, description: Per-request trace identifier for support/correlation.}
-success_code: 0
-reference:
-  name: Global Return Codes (全局返回码)
-  docs: https://developer.fxiaoke.com/openapi_v2/
-notes: >-
-  Individual object/service reference pages (e.g. the Product object create endpoint)
-  document the errorCode/errorMessage envelope per operation. A complete enumerated
-  code table was not machine-harvested and is intentionally not fabricated here.
+  - name: errorCode
+    type: integer
+    description: Return code. 0 indicates success; any non-zero value indicates an error.
+  - name: errorMessage
+    type: string
+    description: >-
+      Human-readable result or error text. The docs explicitly warn against branching on
+      this field — "不能使用返回值的message字段做逻辑判断，errorMessage会有变化" (errorMessage is
+      subject to change). Branch on errorCode only.
+    stable: false
+  - name: errorDescription
+    type: string
+    required: false
+    description: Longer description; carries "success" on a successful call.
+  - name: traceId
+    type: string
+    description: Per-request trace identifier for support correlation.
+  success_code: 0
+
+http_semantics:
+  status_codes_meaningful: false
+  note: >-
+    CRITICAL RUNTIME SEMANTIC. The gateway returns HTTP 200 for business and
+    authorization failures alike — an expired token, a permission denial, an exhausted
+    quota and a successful write are all HTTP 200. A client MUST parse errorCode from the
+    body on every response; HTTP status carries no application meaning. Unrecognised
+    paths also return 200 with errorCode 10006 rather than a 404.
+
+problem_types:
+- code: -2
+  title: 系统错误
+  title_en: System error
+  class: server
+- code: -1
+  title: 系统繁忙
+  title_en: System busy
+  class: server
+  remediation: Retry with backoff.
+- code: 0
+  title: 请求成功
+  title_en: Success
+  class: success
+- code: 10001
+  title: 缺少参数appId
+  title_en: Missing parameter appId
+  class: request
+- code: 10002
+  title: 缺少参数appSecret
+  title_en: Missing parameter appSecret
+  class: request
+- code: 10003
+  title: 缺少参数appAccessToken
+  title_en: Missing parameter appAccessToken
+  class: request
+- code: 10004
+  title: 缺少参数redirectUri
+  title_en: Missing parameter redirectUri
+  class: request
+- code: 10005
+  title: 缺少参数responseType
+  title_en: Missing parameter responseType
+  class: request
+- code: 10006
+  title: 缺少参数scope
+  title_en: Missing parameter scope
+  class: request
+  note: >-
+    Also returned by the API gateway with the message "the request uri=[...],
+    apiName=[null] is not exists" for any unrecognised path — the same code carries two
+    unrelated meanings.
+- code: 10007
+  title: 缺少参数state
+  title_en: Missing parameter state
+  class: request
+- code: 10008
+  title: 缺少参数code
+  title_en: Missing parameter code
+  class: request
+- code: 10009
+  title: 缺少参数appAccount
+  title_en: Missing parameter appAccount
+  class: request
+- code: 10010
+  title: 缺少参数openUserId
+  title_en: Missing parameter openUserId
+  class: request
+- code: 10012
+  title: 缺少参数permanentCode
+  title_en: Missing parameter permanentCode
+  class: request
+- code: 10013
+  title: 缺少参数corpAccessToken
+  title_en: Missing parameter corpAccessToken
+  class: request
+  note: >-
+    The deep-paging FAQ shows this same code returned for "offset out of range 10000",
+    an unrelated pagination failure.
+- code: 10014
+  title: 缺少参数corpId
+  title_en: Missing parameter corpId
+  class: request
+- code: 10015
+  title: 缺少参数toUser
+  title_en: Missing parameter toUser
+  class: request
+- code: 11001
+  title: 参数appId不合法
+  title_en: Invalid parameter appId
+  class: request
+- code: 11002
+  title: 参数appSecret不合法
+  title_en: Invalid parameter appSecret
+  class: request
+- code: 11003
+  title: 参数appAccessToken不合法
+  title_en: Invalid parameter appAccessToken
+  class: auth
+- code: 11004
+  title: 参数redirectUri不合法
+  title_en: Invalid parameter redirectUri
+  class: request
+- code: 11005
+  title: 参数responseType不合法
+  title_en: Invalid parameter responseType
+  class: request
+- code: 11006
+  title: 参数scope不合法
+  title_en: Invalid parameter scope
+  class: request
+- code: 11007
+  title: 参数state不合法
+  title_en: Invalid parameter state
+  class: request
+- code: 11008
+  title: 参数openUserId不合法
+  title_en: Invalid parameter openUserId
+  class: request
+- code: 11009
+  title: 参数departmentId不合法
+  title_en: Invalid parameter departmentId
+  class: request
+- code: 11010
+  title: 参数code不合法
+  title_en: Invalid parameter code
+  class: auth
+- code: 11011
+  title: 参数appAccount不合法
+  title_en: Invalid parameter appAccount
+  class: request
+- code: 11013
+  title: 参数permanentCode不合法
+  title_en: Invalid parameter permanentCode
+  class: auth
+- code: 11014
+  title: 参数corpAccessToken不合法
+  title_en: Invalid parameter corpAccessToken
+  class: auth
+- code: 11015
+  title: 参数corpId不合法
+  title_en: Invalid parameter corpId
+  class: request
+- code: 11016
+  title: 参数toUser不合法
+  title_en: Invalid parameter toUser
+  class: request
+- code: 11017
+  title: 参数msgType不合法
+  title_en: Invalid parameter msgType
+  class: request
+- code: 11018
+  title: 参数templateId不合法
+  title_en: Invalid parameter templateId
+  class: request
+- code: 12002
+  title: 登录状态错误
+  title_en: Login state error
+  class: auth
+- code: 12003
+  title: 未支持的消息类型
+  title_en: Unsupported message type
+  class: request
+- code: 12004
+  title: POST的数据包为空
+  title_en: POST body is empty
+  class: request
+- code: 12005
+  title: 文本消息内容为空
+  title_en: Text message body is empty
+  class: request
+- code: 14001
+  title: 接口调用超过限制
+  title_en: Interface call limit exceeded
+  class: rate-limit
+  remediation: >-
+    Back off and retry. See rate-limits/fxiaoke-rate-limits.yml — the per-interface
+    burst limit is 100 calls per 20 seconds.
+- code: 15002
+  title: 参数不合法
+  title_en: Invalid parameter
+  class: request
+- code: 15003
+  title: APP没有访问权限
+  title_en: App lacks access permission
+  class: authz
+- code: 20005
+  title: accessToken不存在或者已经过期
+  title_en: accessToken does not exist or has expired
+  class: auth
+  remediation: Re-run the token grant and retry.
+- code: 20006
+  title: appId或appSecret错误
+  title_en: appId or appSecret is wrong
+  class: auth
+- code: 20010
+  title: CODE不存在或者已经过期
+  title_en: Authorization code does not exist or has expired
+  class: auth
+- code: 20012
+  title: openUserId未找到
+  title_en: openUserId not found
+  class: not-found
+- code: 20014
+  title: 应用没有获取该员工的数据的权限
+  title_en: The app lacks permission to read this employee's data
+  class: authz
+- code: 20015
+  title: 永久授权码错误
+  title_en: permanentCode is wrong
+  class: auth
+- code: 20016
+  title: corpAccessToken不存在或者已经过期
+  title_en: corpAccessToken does not exist or has expired
+  class: auth
+  remediation: >-
+    The docs name this code as the trigger for a token-refresh retry strategy — cache
+    the token for 6600s and refresh between 6600s and 7200s.
+- code: 20017
+  title: corpId未找到
+  title_en: corpId not found
+  class: not-found
+- code: 20020
+  title: 应用没有获取该企业的数据的权限
+  title_en: The app lacks permission to read this enterprise's data
+  class: authz
+- code: 20021
+  title: 在当前企业下，该app的状态为停用
+  title_en: The app is disabled for this enterprise
+  class: authz
+- code: 20022
+  title: 企业没有对该app授权
+  title_en: The enterprise has not authorized this app
+  class: authz
+- code: 20023
+  title: APP没有访问department的权限
+  title_en: The app lacks permission to access this department
+  class: authz
+- code: 30002
+  title: 当天访问频次超限（0点重新统计）
+  title_en: Daily call quota exhausted; resets at midnight
+  class: rate-limit
+- code: 30003
+  title: 客户没有购买openapi配额，需要提open api订单进行购买
+  title_en: The customer has purchased no Open API quota and must place an order
+  class: commercial
+  remediation: >-
+    Not a transient failure — the tenant must buy an Open API resource pack before any
+    call will succeed. See plans/fxiaoke-plans-pricing.yml.
+- code: 30004
+  title: 秒频次超限
+  title_en: Per-second frequency limit exceeded
+  class: rate-limit
+- code: 30007
+  title: 部门不存在
+  title_en: Department does not exist
+  class: not-found
+- code: 30027
+  title: 员工不存在
+  title_en: Employee does not exist
+  class: not-found
+- code: 32000
+  title: 参数错误
+  title_en: Parameter error
+  class: request
+- code: 40010
+  title: templateId不合法
+  title_en: Invalid templateId
+  class: request
+- code: 50009
+  title: 服务异常，如:超时
+  title_en: Service exception, e.g. timeout
+  class: server
+  remediation: Retry with backoff.
+
+client_side_codes:
+  note: >-
+    The FS JS API returns the same {errorCode, errorMessage} shape to its onFail
+    callback. Two codes appear only on that surface in the documentation.
+  codes:
+  - code: 30000
+    title: 请更新纷享客户端到最新版本
+    title_en: Client version too old — update the Fxiaoke client
+    source: https://developer.fxiaoke.com/openapi_v2/common/client/guide/js.html
+  - code: 40000
+    title: 请求参数错误
+    title_en: Request parameter error
+    source: https://developer.fxiaoke.com/openapi_v2/common/client/guide/js.html
+
+coverage:
+  codes_documented: 62
+  registry_complete: true
+  note: >-
+    The 全局返回码 table is transcribed in full. Individual object and common-service
+    reference pages may return additional module-specific codes that the global table
+    does not enumerate; none are fabricated here.
+
+ref:
+  rate_limits: rate-limits/fxiaoke-rate-limits.yml
+  conventions: conventions/fxiaoke-conventions.yml
+  authentication: authentication/fxiaoke-authentication.yml

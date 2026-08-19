@@ -1,23 +1,120 @@
-generated: '2026-07-19'
+generated: '2026-08-13'
 method: searched
 source: https://developer.fxiaoke.com/openapi_v2/
+docs:
+- https://developer.fxiaoke.com/openapi_v2/
+- https://developer.fxiaoke.com/openapi_v2/start/example/old.html
+- https://developer.fxiaoke.com/openapi_v2/start/example/public.html
+- https://developer.fxiaoke.com/openapi_v2/start/guide/cloud.html
+
 versioning:
   scheme: uri-path
   current: v2
   docs: https://developer.fxiaoke.com/openapi_v2/
   evidence: >-
     The current generation is Open API v2, namespaced under the /openapi_v2/
-    documentation path with V2-suffixed cgi endpoints (e.g. the OAuth token grant).
+    documentation path with V2-suffixed cgi endpoints such as
+    /cgi/corpAccessToken/get/V2 and /cgi/crm/v2/data/get.
+  previous_generation: v1 (no longer documented on the public developer site)
+
+parameter_convention_migration:
+  status: two conventions documented in parallel
+  current: >-
+    新版传参 — credentials and tenant context move to HTTP headers (authorization
+    Bearer, x-fs-ea, x-fs-userid); convertUserId and convertMediaId default to false.
+  legacy: >-
+    旧版传参方式 — no headers; corpAccessToken, currentOpenUserId and corpId are carried
+    as top-level fields of the JSON body; convertUserId and convertMediaId default to
+    true.
+  legacy_docs: https://developer.fxiaoke.com/openapi_v2/start/example/old.html
+  sunset_date: null
+  migration_guide: true
+  note: >-
+    This is the clearest lifecycle event on the surface — a real breaking change in how
+    every call is authenticated, with both conventions still live. Fxiaoke documents the
+    difference and keeps the old page reachable, but publishes no sunset date, no
+    deprecation header, and no announcement channel for when the legacy convention will
+    stop working. Documenting a migration is not a deprecation policy, so no Deprecation
+    pointer is emitted.
+
 deprecation:
   policy_url: null
+  policy_published: false
   sunset_header: false
-  notes: No formal deprecation/sunset policy or RFC 8594 Sunset/Deprecation header support was found.
+  deprecation_header: false
+  rfc8594: false
+  notes: >-
+    No formal deprecation or sunset policy exists, and no RFC 8594 Sunset/Deprecation
+    response headers are documented. No operation in the reference is marked deprecated.
+
+change_communication:
+  changelog_url: null
+  changelog_published: false
+  notes: >-
+    The developer manual carries a per-page "last revised" date — every page surveyed
+    reads 2026-01-16 — but there is no dated changelog, release-notes page, RSS feed or
+    developer announcement list. An integrator has no way to learn that an endpoint
+    changed except by re-reading the reference. No ChangeLog pointer is emitted.
+  corporate_news: https://www.fxiaoke.com/crm/news/
+  corporate_news_note: >-
+    Company news exists but is marketing/press, not API release notes.
+
 sla:
   url: null
   uptime_target: null
-status_page: null
+  published: false
+
+status_page:
+  url: null
+  published: false
+  probed:
+  - url: https://status.fxiaoke.com
+    status: '000'
+    result: does not resolve
+  - url: https://fxiaoke.statuspage.io
+    status: 200
+    result: >-
+      FALSE POSITIVE — redirects to https://www.atlassian.com/software/statuspage, the
+      Statuspage marketing site. Fxiaoke has no Atlassian Statuspage tenant. Recorded
+      because a naive 200 check would have credited a status page that does not exist.
+  notes: >-
+    No status page, incident history or uptime dashboard was found on any Fxiaoke host.
+    No StatusPage pointer is emitted.
+
+client_artifact_currency:
+  fs_jsapi_latest_published: 2.3.4
+  fs_jsapi_latest_published_date: '2021-05-18'
+  fs_jsapi_version_in_docs: 2.1.3
+  fs_jsapi_docs_version_date: '2019-12-03'
+  finding: >-
+    The documentation still tells integrators to load FS JSAPI 2.1.3 (2019) while
+    Fxiaoke's own CDN hosts 2.3.4 (2021). The newest first-party client artifact of any
+    kind is more than five years old, even though the API reference pages were revised in
+    January 2026.
+  ref: packages/fxiaoke-packages.yml
+
+regional_deployments:
+  note: >-
+    The API is deployed across six named clouds and the host is tenant-specific; a
+    client hard-coding open.fxiaoke.com will fail for tenants on any other cloud. There
+    is no documented mechanism for discovering a tenant's cloud programmatically — the
+    docs instruct the integrator to substitute the domain by hand.
+  hosts:
+  - open.fxiaoke.com
+  - open-hwcloud.fxiaoke.com
+  - open-ale.fxiaoke.com
+  - open-hws.fxiaoke.com
+  - open-ksc.sharecrm.com
+  - open-na.sharecrm.com
+  source: https://developer.fxiaoke.com/openapi_v2/start/guide/cloud.html
+
 notes: >-
-  No public status page or SLA document was located for the Fxiaoke Open API. The
-  clearest lifecycle signal is the v2 API generation and its token caching/refresh
-  contract (see conventions/ + authentication/). StatusPage and Deprecation pointers
-  are intentionally NOT emitted because neither surface was found.
+  Operational transparency is the weakest facet of this provider's surface: no status
+  page, no SLA, no changelog, no deprecation policy and no sunset headers, against an
+  API that is actively documented and commercially metered. StatusPage and Deprecation
+  pointers are intentionally NOT emitted because neither surface exists.
+
+ref:
+  conventions: conventions/fxiaoke-conventions.yml
+  packages: packages/fxiaoke-packages.yml
+  rate_limits: rate-limits/fxiaoke-rate-limits.yml

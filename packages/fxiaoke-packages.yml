@@ -1,0 +1,142 @@
+generated: '2026-08-13'
+method: probed
+source: >-
+  https://developer.fxiaoke.com/openapi_v2/common/client/guide/js.html (first-party
+  JS API distribution) plus direct registry lookups against registry.npmjs.org,
+  pypi.org, search.maven.org and the GitHub search API.
+summary:
+  official_count: 1
+  third_party_count: 6
+  registries_checked: [npm, pypi, maven-central, github]
+  note: >-
+    Fxiaoke publishes no server-side SDK to any public package registry. The only
+    first-party client library it distributes is the FS JS API browser bundle, served
+    from its own CDN path on www.fxiaoke.com — there is no npm/PyPI/Maven artifact for
+    it, so currency is read from the pinned version in the URL and the CDN
+    Last-Modified header rather than a registry metadata endpoint.
+
+packages:
+- name: FS JSAPI (纷享 JS API)
+  official: true
+  language: javascript
+  registry: cdn
+  url: https://www.fxiaoke.com/open/jsapi/2.3.4/fsapi.min.js
+  version: 2.3.4
+  published: '2021-05-18'
+  install: '<script src="https://www.fxiaoke.com/open/jsapi/2.3.4/fsapi.min.js"></script>'
+  global: FSOpen
+  docs: https://developer.fxiaoke.com/openapi_v2/common/client/guide/js.html
+  evidence:
+    probe: https://www.fxiaoke.com/open/jsapi/2.3.4/fsapi.min.js
+    http_status: 200
+    content_type: application/javascript
+    banner: '/*! FS JSAPI v2.3.4 | (c) fxiaoke.com */'
+    last_modified: 'Tue, 18 May 2021 03:04:16 GMT'
+  version_discovery: >-
+    The CDN path is version-pinned. Probing the path space found published bundles at
+    2.1.2, 2.1.3, 2.1.4, 2.1.5, 2.1.6, 2.2.0, 2.2.1, 2.2.2, 2.3.0, 2.3.1, 2.3.2, 2.3.3
+    and 2.3.4; 2.3.5 and above return the www.fxiaoke.com SPA shell (a soft 200, not a
+    bundle), so 2.3.4 is the highest published release. There is no /latest/ alias —
+    https://www.fxiaoke.com/open/jsapi/latest/fsapi.min.js also returns the SPA shell.
+  currency_note: >-
+    DECAY SIGNAL. The current developer documentation still instructs integrators to
+    load version 2.1.3 (Last-Modified 2019-12-03), three minor versions behind the
+    2.3.4 bundle Fxiaoke actually hosts (Last-Modified 2021-05-18). The newest
+    first-party client artifact of any kind is over five years old, while the Open API
+    v2 reference pages were revised 2026-01-16.
+
+- name: gamma-api-fs
+  official: false
+  language: javascript
+  registry: npm
+  url: https://www.npmjs.com/package/gamma-api-fs
+  version: 1.0.1
+  published: '2018-11-09'
+  description: fxiaoke jssdk
+  note: >-
+    Published by an npm account whose author email is linh@fxiaoke.com — a company
+    address — but the package is not referenced anywhere in the Fxiaoke developer
+    documentation and carries no repository or homepage, so it is NOT marked official.
+    Recorded because the author domain makes it the closest thing to a first-party npm
+    publish that exists.
+
+- name: fxiaoke
+  official: false
+  language: javascript
+  registry: npm
+  url: https://www.npmjs.com/package/fxiaoke
+  version: 1.0.0
+  published: '2016-10-20'
+  description: 纷享销客paas组自行封装模块
+  repository: https://git.oschina.net/openote/fxiaoke.git
+  note: >-
+    Self-described as a wrapper written by "the Fxiaoke PaaS group" but published by an
+    individual account (cuiyongxu / zhenghaibo) to a personal Gitee repo, single 1.0.0
+    release from 2016, never updated. Not marked official.
+
+- name: fxiaoke-api
+  official: false
+  language: typescript
+  registry: npm
+  url: https://www.npmjs.com/package/fxiaoke-api
+  version: 0.0.23
+  published: '2018-11-10'
+  description: 纷享开放 API
+  author: zswang
+  note: Third-party community wrapper. Unmaintained since 2018.
+
+- name: k8scat/fxiaoke
+  official: false
+  language: go
+  registry: github
+  url: https://github.com/k8scat/fxiaoke
+  version: null
+  published: null
+  description: 纷享销客开放平台 Go SDK
+  note: >-
+    Third-party Go SDK. version/published are null because the repository publishes no
+    tagged release to proxy.golang.org that could be read — checked, nothing to record.
+
+- name: ZhangZihe/FxiaokeSDK.NET
+  official: false
+  language: csharp
+  registry: github
+  url: https://github.com/ZhangZihe/FxiaokeSDK.NET
+  version: null
+  published: null
+  description: 纷享销客SDK - C#版本
+  note: >-
+    Third-party .NET SDK, the most-starred community wrapper found (3 stars). No NuGet
+    package exists under this name; version/published null.
+
+- name: scutken/sharecrm-sdk-js
+  official: false
+  language: typescript
+  registry: github
+  url: https://github.com/scutken/sharecrm-sdk-js
+  version: null
+  published: null
+  description: 纷享销客CRM OpenAPI SDK / ShareCRM OpenAPI SDK
+  note: Third-party JS/TS wrapper; no npm publish under this name. version/published null.
+
+absent:
+- registry: npm
+  queried: ['@fxiaoke/sdk', fxiaoke-sdk, fxiaoke-open-api]
+  result: 404 — no first-party scope or package
+- registry: pypi
+  queried: [fxiaoke, fxiaoke-sdk]
+  result: 404 — no Python SDK
+- registry: maven-central
+  queried: fxiaoke
+  result: numFound 0 — no Java SDK, despite the docs targeting server-side integrators
+- registry: github
+  queried: [orgs/fxiaoke, orgs/foneshare, orgs/sharecrm]
+  result: >-
+    No first-party GitHub organization exists. Every fxiaoke repository returned by the
+    GitHub search API belongs to an individual community developer.
+
+notes: >-
+  The practical consequence for an integrator: there is no maintained, installable
+  Fxiaoke client for any server-side language. Integrations are written by hand against
+  the JSON-over-HTTP POST reference, which is consistent with the docs' own tooling
+  page recommending Postman/Insomnia/Apifox rather than an SDK.

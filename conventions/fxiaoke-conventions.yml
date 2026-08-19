@@ -1,56 +1,195 @@
-generated: '2026-07-19'
+generated: '2026-08-13'
 method: searched
-source: https://developer.fxiaoke.com/openapi_v2/
+source: https://developer.fxiaoke.com/openapi_v2/start/example/public.html
 docs:
-- https://developer.fxiaoke.com/openapi_v2/en/start/example/example.html
+- https://developer.fxiaoke.com/openapi_v2/start/example/public.html
+- https://developer.fxiaoke.com/openapi_v2/start/example/old.html
+- https://developer.fxiaoke.com/openapi_v2/start/example/example.html
+- https://developer.fxiaoke.com/openapi_v2/start/guide/cloud.html
+- https://developer.fxiaoke.com/openapi_v2/start/guide/param.html
+- https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
 - https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html
+
 transport:
   style: json-rpc-over-http
   method: POST
   content_type: application/json
-  base_host: https://open.fxiaoke.com
+  rest: false
   description: >-
-    Every Open API v2 operation is an HTTP POST with a JSON body to a per-object /
-    per-service path (e.g. object create/update/query and common services such as
-    approval actions). Request and response bodies are JSON.
+    Every Open API v2 operation is an HTTP POST with a JSON body to a per-object or
+    per-service path under /cgi/. Paths are verbs, not resources — e.g.
+    /cgi/crm/v2/data/get, /cgi/jsApiTicket/get, /cgi/corpAccessToken/get/V2,
+    /cgi/crm/erp/syncdata/objdata/push. HTTP methods and status codes carry no
+    application semantics.
+
+base_hosts:
+  note: >-
+    There is no single base URL. The host is determined by which cloud the tenant's
+    enterprise sits on, and the docs write every path as
+    https://${填入所在云的域名}/... — the integrator substitutes their own cloud domain.
+  canonical: https://open.fxiaoke.com
+  pattern: open-${cloud-login-domain}
+  hosts:
+  - host: open.fxiaoke.com
+    cloud: 纷享云 (Fxiaoke Cloud, default)
+  - host: open-hwcloud.fxiaoke.com
+    cloud: 华为云 (Huawei Cloud)
+  - host: open-ale.fxiaoke.com
+    cloud: 阿里云 (Alibaba Cloud)
+  - host: open-hws.fxiaoke.com
+    cloud: 法兰克福 (Frankfurt)
+  - host: open-ksc.sharecrm.com
+    cloud: 香港华为 (Hong Kong, Huawei)
+  - host: open-na.sharecrm.com
+    cloud: 北美云 (North America)
+  source: https://developer.fxiaoke.com/openapi_v2/start/guide/cloud.html
+
 authentication:
-  style: token-in-body
-  description: >-
-    Calls carry the access token and tenant context (corpId, currentOpenUserId) in the
-    JSON request body rather than an Authorization header. See
-    authentication/fxiaoke-authentication.yml.
+  style: bearer-header
+  current:
+    description: >-
+      The current ("新版") passing convention puts credentials in HTTP headers.
+    headers:
+    - name: authorization
+      value: 'Bearer <token>'
+      note: Literal "Bearer " prefix including the trailing space, then the token.
+    - name: x-fs-ea
+      description: Enterprise account, taken from the "ea" field of the token response.
+    - name: x-fs-userid
+      description: The acting employee's CRM 员工ID.
+    exception: The token-grant call itself sends no headers.
+  legacy:
+    description: >-
+      The older ("旧版") convention sets no headers and instead carries corpAccessToken,
+      currentOpenUserId and corpId as top-level fields of the JSON request body. Still
+      documented and still functional; see lifecycle/ for the migration posture.
+    source: https://developer.fxiaoke.com/openapi_v2/start/example/old.html
   ref: authentication/fxiaoke-authentication.yml
-error_envelope:
-  fields:
-  - errorCode      # integer; 0 indicates success
-  - errorMessage   # human-readable message
-  - traceId        # per-request trace identifier
-  reference: Global Return Codes (全局返回码) in the Open API v2 docs
-  ref: errors/fxiaoke-problem-types.yml
+
 request_tracing:
   supported: true
-  mechanism: >-
-    The token endpoint accepts a caller-supplied thirdTraceId query parameter and
-    responses echo a server traceId, enabling end-to-end request correlation.
+  required: true
+  parameter: thirdTraceId
+  location: query string
+  format: RFC 4122 UUID version 4
+  description: >-
+    EVERY endpoint requires a caller-generated thirdTraceId appended to the URL, and it
+    must be different on every request. Example:
+    /cgi/crm/v2/data/get?thirdTraceId=5ea0422d-98e3-49e0-a3cb-9bd5517d1f30
+  response_field: traceId
+  note: >-
+    The server returns its own traceId in every response body, giving end-to-end
+    correlation. Making a caller-supplied trace ID mandatory on every call is unusual
+    and is a genuine operability strength.
+
+platform_parameters:
+  location: top level of the JSON body, alongside data
+  parameters:
+  - name: convertUserId
+    type: boolean
+    default: false
+    default_legacy: true
+    description: >-
+      When true, employee IDs are converted to FSUID. Under the current convention the
+      default is false and CRM employee IDs are used directly.
+  - name: convertMediaId
+    type: boolean
+    default: false
+    default_legacy: true
+    description: >-
+      When true, file parameters use mediaId. Under the current convention the default
+      is false and file parameters use npath.
+  envelope_shape: |
+    {
+      "convertUserId": false,
+      "convertMediaId": false,
+      "data": { }
+    }
+
 pagination:
-  style: cursor-deep-paging
+  style: offset-with-keyset-workaround
   documented: true
   docs: https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html
-  description: >-
-    List/query operations support deep paging for retrieving large result sets; the
-    docs publish a dedicated deep-paging guide covering how to page past standard
-    offset limits.
+  request_object: search_query_info
+  params: [limit, offset, filters, orders, fieldProjection]
+  response_fields: [dataList, offset, limit, total]
+  offset_cap: 10000
+  error_on_cap:
+    errorCode: 10013
+    errorMessage: offset out of range 10000
+    errorDescription: offset 不能超过10000
+  deep_paging: >-
+    Past 10,000 rows the documented technique is keyset pagination: order by _id
+    ascending, hold offset at 0, and filter _id GT the last _id returned by the previous
+    page. The docs publish a worked AccountObj example.
+  total_count:
+    field: find_explicit_total_num
+    note: >-
+      total is returned as 0 unless find_explicit_total_num is set true, so a client
+      must opt in to a row count.
+
+field_semantics:
+  discovery: >-
+    Field lists are not static. An integrator calls the object-describe endpoint to
+    retrieve an object's describe/fields metadata, then formats each value according to
+    that field's "type". The docs publish a field-value formatting guide per type.
+  describe_endpoints:
+  - https://developer.fxiaoke.com/openapi_v2/common/system/object-describe/describe.html
+  - https://developer.fxiaoke.com/openapi_v2/common/system/object-describe/list.html
+  docs: https://developer.fxiaoke.com/openapi_v2/start/guide/param.html
+  ref: data-model/fxiaoke-data-model.yml
+
+error_envelope:
+  fields: [errorCode, errorMessage, errorDescription, traceId]
+  success_code: 0
+  http_status_meaningful: false
+  stable_field: errorCode
+  unstable_field: errorMessage
+  warning: >-
+    The docs repeat on every reference page: 不能使用返回值的message字段做逻辑判断 — never branch on
+    errorMessage, it changes. Branch on errorCode.
+  ref: errors/fxiaoke-problem-types.yml
+
 idempotency:
   supported: false
-  notes: No idempotency-key mechanism is documented for Open API v2 write operations.
+  header: null
+  notes: >-
+    No idempotency key, request-deduplication window or safe-retry mechanism is
+    documented for write operations. thirdTraceId is required to be UNIQUE per request,
+    so it is the opposite of an idempotency key — replaying a write with a fresh
+    thirdTraceId will duplicate it, and replaying with the same one is not documented as
+    deduplicating. No Idempotency pointer is emitted.
+
+rate_limiting:
+  documented: true
+  per_interface: 100 calls / 20 seconds
+  daily_quota: purchased Open API resource pack (100,000 calls per pack, stackable)
+  token_endpoint: 10 calls / minute, no concurrency
+  response_headers: none
+  ref: rate-limits/fxiaoke-rate-limits.yml
+
 versioning:
   scheme: uri-path
   current: v2
-  evidence: /openapi_v2/ documentation namespace and V2-suffixed cgi paths
+  evidence: >-
+    /openapi_v2/ documentation namespace and V2-suffixed cgi paths such as
+    /cgi/corpAccessToken/get/V2.
   ref: lifecycle/fxiaoke-lifecycle.yml
-rate_limiting:
-  documented: unknown
-  notes: >-
-    The developer docs reference call-frequency guidance but no explicit numeric
-    per-app rate-limit table was captured; token caching guidance (min 6600s) is the
-    clearest published throttling-adjacent contract.
+
+expansion:
+  sparse_fields: true
+  mechanism: fieldProjection inside search_query_info selects the fields returned.
+  expansion: >-
+    No $expand/include mechanism is documented; master-detail data is fetched through
+    detail-specific endpoints or the detailFieldVals structure on sync operations.
+
+conditional_requests:
+  etag: false
+  last_modified: false
+  note: No conditional-request or caching semantics are documented for API responses.
+
+ref:
+  authentication: authentication/fxiaoke-authentication.yml
+  errors: errors/fxiaoke-problem-types.yml
+  lifecycle: lifecycle/fxiaoke-lifecycle.yml
+  rate_limits: rate-limits/fxiaoke-rate-limits.yml

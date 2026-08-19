@@ -1,0 +1,59 @@
+generated: '2026-08-13'
+method: searched
+source: https://open.fxiaoke.com/.well-known/oauth-authorization-server
+docs:
+- https://developer.fxiaoke.com/openapi_v2/start/auth/auth-code.html
+- https://developer.fxiaoke.com/openapi_v2/start/guide/codes.html
+scope_count: 0
+published: false
+summary: >-
+  Fxiaoke documents OAuth but publishes NO scope registry. This file records that
+  measured absence; no OAuthScopes pointer is emitted in apis.yml, because a pointer
+  would assert the provider publishes a scope catalog it does not.
+
+evidence:
+- source: https://open.fxiaoke.com/.well-known/oauth-authorization-server
+  http_status: 200
+  finding: >-
+    The RFC 8414 metadata document omits scopes_supported entirely. It advertises
+    grant_types, response_types, code_challenge_methods, token_endpoint_auth_methods,
+    subject_types and id_token_signing_alg_values — but no scopes.
+- source: https://developer.fxiaoke.com/openapi_v2/start/auth/auth-code.html
+  http_status: 200
+  finding: >-
+    The documented authorization-code flow's parameter table lists appId, redirectUrl,
+    responseType, state and thirdTraceId. There is no scope parameter in the documented
+    request, and no consent-screen description.
+- source: https://developer.fxiaoke.com/openapi_v2/start/guide/codes.html
+  http_status: 200
+  finding: >-
+    A scope parameter demonstrably exists somewhere in the platform — the global return
+    code table defines 10006 "缺少参数scope" (missing parameter scope) and 11006
+    "参数scope不合法" (invalid parameter scope) — but no valid values are published
+    anywhere on the public surface.
+
+authorization_model:
+  actual: admin-granted per-app permissions
+  description: >-
+    In practice authorization is not scope-based from the developer's side. A tenant
+    administrator creates a self-built application and grants it access to enterprise
+    data, employees and departments through the Fxiaoke admin console. The application
+    receives no scope string; it discovers its limits by being denied at call time.
+  denial_codes:
+  - {code: 15003, meaning: APP没有访问权限 — app lacks access permission}
+  - {code: 20014, meaning: 应用没有获取该员工的数据的权限 — no permission for this employee's data}
+  - {code: 20020, meaning: 应用没有获取该企业的数据的权限 — no permission for this enterprise's data}
+  - {code: 20021, meaning: app is disabled for this enterprise}
+  - {code: 20022, meaning: 企业没有对该app授权 — the enterprise has not authorized this app}
+  - {code: 20023, meaning: APP没有访问department的权限 — no permission to access this department}
+  consequence: >-
+    An agent or integrator cannot determine, before calling, what an app is permitted to
+    do. There is no introspection endpoint, no granted-permission list in the token
+    response, and no scope registry — permission boundaries are discovered only through
+    runtime denials returned as HTTP 200 with a non-zero errorCode.
+
+scopes: []
+
+ref:
+  authentication: authentication/fxiaoke-authentication.yml
+  errors: errors/fxiaoke-problem-types.yml

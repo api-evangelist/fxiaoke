@@ -1,0 +1,133 @@
+generated: '2026-08-13'
+method: searched
+source: https://developer.fxiaoke.com/openapi_v2/common/client/guide/overview.html
+docs:
+- https://developer.fxiaoke.com/openapi_v2/common/client/guide/overview.html
+- https://developer.fxiaoke.com/openapi_v2/common/client/guide/js.html
+- https://developer.fxiaoke.com/openapi_v2/common/client/guide/dev.html
+- https://developer.fxiaoke.com/openapi_v2/common/client/guide/ticket.html
+summary: >-
+  Fxiaoke ships a client-side embedding surface distinct from its REST API: a JavaScript
+  bridge API (FS JS API) that lets an H5/web app hosted inside the Fxiaoke mobile client
+  reach device and platform capability, plus a Vue-based UI component library so those
+  embedded apps match the host application. This is the "embed your app inside our
+  client" pattern, not an SDK for calling the Open API.
+family_count: 2
+component_group_count: 11
+
+families:
+- name: FS JS API (纷享 JS API)
+  kind: javascript-bridge
+  global: FSOpen
+  loader:
+    type: cdn-script
+    url: https://www.fxiaoke.com/open/jsapi/2.1.3/fsapi.min.js
+    latest_published: https://www.fxiaoke.com/open/jsapi/2.3.4/fsapi.min.js
+    self_host: supported — the docs sanction downloading fsapi.min.js and serving it locally
+    ref: packages/fxiaoke-packages.yml
+  initialization:
+    method: FSOpen.init
+    required: true
+    params: [appId, timestamp, nonceStr, signature]
+    signature_algorithm: >-
+      sha1 over the ASCII-sorted key=value join of noncestr, jsapi_ticket, timestamp and
+      url (the page URL without the fragment), uppercased hex.
+    ticket:
+      name: jsapi_ticket
+      endpoint: https://open.fxiaoke.com/cgi/jsApiTicket/get
+      obtained_with: corpAccessToken + corpId
+      lifetime_seconds: 7200
+      caching: >-
+        The docs require developers to cache the ticket globally in their own service;
+        refreshing it too often trips the API call limit.
+      docs: https://developer.fxiaoke.com/openapi_v2/common/client/guide/ticket.html
+  platform_support:
+    android: true
+    ios: true
+    windows: false
+    macos: false
+    note: JS API 当前仅支持 Android 和 iOS 客户端 — desktop clients are explicitly unsupported.
+  callback_convention: >-
+    Every method takes a single JSON object argument carrying its parameters plus
+    onSuccess(resp) and onFail(error) callbacks. Errors arrive as
+    {errorCode, errorMessage} using the same code registry as the REST API.
+  groups:
+  - id: contain
+    name: 容器 (container)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/contain.html
+  - id: device
+    name: 设备 (device)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/device.html
+  - id: launcher
+    name: 启动器 (launcher)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/launcher.html
+  - id: webview
+    name: Webview
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/webview.html
+  - id: layer
+    name: 弹层 (layer / overlays)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/layer.html
+  - id: fs
+    name: 纷享服务 (platform services — contacts, directory, messaging)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/fs.html
+    sample_methods:
+    - service.contact.select
+    - service.contact.selectDepartment
+    - service.contact.selectUser
+    - service.contact.getMembers
+    - service.contact.getUsersInfo
+    - service.contact.setMark
+    - service.contact.getServiceChannelsInfo
+  - id: media
+    name: 媒体 (media)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/media.html
+  - id: universal
+    name: 通用 (universal)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/JS/universal.html
+
+- name: 纷享 UI 组件库 (Fxiaoke UI component library)
+  kind: ui-component-library
+  framework: vue
+  layout: flexbox-based responsive layout system
+  distribution:
+    type: download
+    bundles: [uikit.js, uikit.css]
+    partial: >-
+      Per-category js/css files under a components/ folder can be referenced instead of
+      the full bundle to cut page weight.
+    url: null
+    note: >-
+      DISTRIBUTION GAP — the docs instruct developers to download a zip containing
+      uikit.js and uikit.css and serve it themselves, but publish no download URL,
+      version number, npm package or CDN path on the public documentation. Probes of
+      plausible CDN locations under www.fxiaoke.com/open/ returned the site's SPA shell.
+      A consumer cannot tell which version of the component library they are getting.
+  groups:
+  - id: basic
+    name: 基础类库 (basic components)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/UI/basic.html
+    sample_components: [Actionsheet, Badge, Group, Switch, Toast]
+  - id: form
+    name: 表单 (form components)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/UI/form.html
+  - id: layer
+    name: 弹层 (overlay components)
+    docs: https://developer.fxiaoke.com/openapi_v2/common/client/UI/layer.html
+
+integration_flow:
+  source: https://developer.fxiaoke.com/openapi_v2/common/client/guide/dev.html
+  steps:
+  - Create a self-built enterprise app and enable developer mode to obtain appId, appSecret, permanentCode
+  - Exchange those for a corpAccessToken
+  - Cache the corpAccessToken per app (7200s lifetime)
+  - Fetch a jsapi_ticket with the corpAccessToken
+  - Compute the sha1 signature over noncestr + jsapi_ticket + timestamp + url
+  - Call FSOpen.init with appId, timestamp, nonceStr, signature
+  - Build application logic against the JS API and UI components
+  note: >-
+    Steps 1–3 alone are enough for silent sign-on (免登录) without any JS API use; adding
+    an app entry point with no SSO requires no code at all.
+
+ref:
+  packages: packages/fxiaoke-packages.yml
+  authentication: authentication/fxiaoke-authentication.yml

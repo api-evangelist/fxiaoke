@@ -1,0 +1,96 @@
+generated: '2026-08-13'
+method: searched
+source: https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+docs:
+- https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+- https://developer.fxiaoke.com/openapi_v2/start/auth/app-info.html
+- https://developer.fxiaoke.com/openapi_v2/start/guide/codes.html
+limit_count: 4
+summary: >-
+  Fxiaoke publishes hard numeric limits for the Open API v2, which is unusual for this
+  cohort. Limits are enforced in three layers — a per-operation burst limit, a
+  purchased daily call quota, and a much tighter limit on the token-grant endpoint.
+  Exhaustion is signalled ONLY in the JSON error envelope: there are no RateLimit-*,
+  X-RateLimit-* or Retry-After response headers documented anywhere, and the HTTP
+  status on exhaustion stays 200 because every Open API v2 response is a 200 carrying a
+  non-zero errorCode.
+
+limits:
+- id: per-operation-burst
+  scope: per-endpoint
+  limit: 100
+  window: 20s
+  burst: null
+  description: >-
+    单接口调用限制：100次/20秒 — 100 calls per 20 seconds against any single interface.
+    Raising it requires purchasing the 独立库 (dedicated-database) product; the docs
+    direct integrators to Fxiaoke sales.
+  source: https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+
+- id: daily-quota
+  scope: per-account
+  limit: 100000
+  window: 1d
+  reset: midnight (0点重新统计)
+  description: >-
+    总接口调用次数限制(按天) — the daily cap is not a fixed platform number but the size of
+    the Open API resource pack the tenant bought. The docs name a 100,000-call pack;
+    packs stack, so buying multiple raises the ceiling additively. A tenant with no pack
+    has no quota at all (see errorCode 30003).
+  metered: true
+  purchasable: true
+  source: https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html
+
+- id: token-grant
+  scope: per-app
+  limit: 10
+  window: 60s
+  concurrency: 1
+  description: >-
+    本接口每分钟调用应不超过10次；不能并发调用本接口 — the corpAccessToken / client-credentials
+    grant is capped at 10 calls per minute and must not be called concurrently. Tokens
+    live 7200s and the same token is returned for the first 6600s, so the documented
+    contract is to cache the token for 6600s and refresh in the 6600–7200s window.
+  source: https://developer.fxiaoke.com/openapi_v2/start/auth/app-info.html
+
+- id: query-offset-cap
+  scope: per-endpoint
+  limit: 10000
+  window: null
+  description: >-
+    列表查询偏移量范围不能超过10000 — list/query operations reject an offset above 10,000 with
+    errorCode 10013 ("offset out of range 10000"). Not a rate limit in the throttling
+    sense, but it is the hard pagination ceiling an agent will hit on any large read,
+    and the docs publish a keyset workaround (order by _id, filter _id GT last seen).
+  source: https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html
+
+response_signalling:
+  headers: []
+  headers_documented: false
+  http_status_on_exhaustion: 200
+  retry_after: false
+  note: >-
+    No rate-limit response headers are documented. Because the gateway returns HTTP 200
+    for business errors, a client CANNOT detect throttling from the status line — it
+    must parse errorCode out of the JSON body on every response. This is the single
+    biggest agent-readiness gap in the runtime contract.
+  error_codes:
+  - code: 14001
+    meaning: 接口调用超过限制 — interface call limit exceeded
+  - code: 30004
+    meaning: 秒频次超限 — per-second frequency limit exceeded
+  - code: 30002
+    meaning: 当天访问频次超限（0点重新统计） — daily call quota exhausted, resets at midnight
+  - code: 30003
+    meaning: >-
+      客户没有购买openapi配额，需要提open api订单进行购买 — the tenant has bought no Open API quota
+      at all and must place an order before any call succeeds
+  - code: 20016
+    meaning: >-
+      corpAccessToken 不存在或者已经过期 — the docs explicitly recommend keying retry logic off
+      this code when the cached token expires
+
+ref:
+  errors: errors/fxiaoke-problem-types.yml
+  plans: plans/fxiaoke-plans-pricing.yml
+  conventions: conventions/fxiaoke-conventions.yml

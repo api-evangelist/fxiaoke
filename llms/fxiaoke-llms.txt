@@ -1,39 +1,83 @@
 # Fxiaoke (纷享销客)
 
-> Fxiaoke is a Chinese enterprise SaaS company providing a connected, AI-driven "Agentic CRM" platform spanning marketing, sales, and customer service for 6,000+ enterprise customers. Its Open API v2 exposes CRM business objects (accounts, contacts, leads, opportunities, products, orders) and common services (approval workflows, directory/contact sync, business-data sync) as a JSON-over-HTTP POST RPC interface hosted at open.fxiaoke.com, authenticated with a self-built enterprise app (appId + appSecret + permanentCode) exchanged for an access token, plus a modern OAuth 2.1 (PKCE) authorization server.
+> Fxiaoke is a Chinese enterprise SaaS company providing a connected, AI-driven "Agentic CRM" platform spanning marketing, sales, and customer service for 6,000+ enterprise customers. Its Open API v2 exposes CRM business objects (accounts, contacts, leads, opportunities, products, orders) and common services (approval workflows, directory/contact sync, business-data sync) as a JSON-over-HTTP POST RPC interface, authenticated with a self-built enterprise app (appId + appSecret + permanentCode) exchanged for a corpAccessToken, plus a standards-based OAuth 2.1 (PKCE) authorization server discoverable on every regional cloud host.
+
+## What an agent needs to know first
+
+- **No machine-readable contract.** There is no OpenAPI, Swagger, GraphQL SDL, AsyncAPI or Protobuf definition. All 1,080+ operations are hand-written HTML reference pages.
+- **No MCP server and no A2A agent card.** Probed 2026-08-13; see the artifacts below.
+- **HTTP status codes are meaningless.** Every response is HTTP 200. Success, auth failure, permission denial, quota exhaustion and unknown-path all return 200 with a non-zero `errorCode` in the JSON body. Branch on `errorCode`, never on the status line and never on `errorMessage` (the docs say it changes).
+- **The host is tenant-specific.** `open.fxiaoke.com` is only the default cloud. A tenant may be on `open-hwcloud.fxiaoke.com`, `open-ale.fxiaoke.com`, `open-hws.fxiaoke.com` (Frankfurt), `open-ksc.sharecrm.com` (Hong Kong) or `open-na.sharecrm.com` (North America). There is no programmatic way to discover which.
+- **Every request needs a fresh `thirdTraceId`.** An RFC 4122 UUIDv4 appended to the query string of every call, different each time.
+- **No idempotency.** No idempotency key or dedupe window is documented for writes. Retrying a failed write may duplicate it.
+- **The API must be purchased.** A tenant without an Open API resource pack gets `errorCode 30003` on every call.
 
 ## APIs
 
-- [Fxiaoke Open API v2](https://developer.fxiaoke.com/openapi_v2/): CRM business-object and common-service API over JSON/HTTP POST; base host https://open.fxiaoke.com
+- [Fxiaoke Open API v2](https://developer.fxiaoke.com/openapi_v2/): CRM business-object and common-service API over JSON/HTTP POST; default base host https://open.fxiaoke.com, paths under /cgi/
 
 ## Docs
 
-- [Open API v2 developer manual](https://developer.fxiaoke.com/openapi_v2/): tutorials, guides, and API reference
+- [Open API v2 developer manual](https://developer.fxiaoke.com/openapi_v2/): tutorials, guides, and API reference (four sections; last revised 2026-01-16)
 - [Quick start](https://developer.fxiaoke.com/openapi_v2/start/quickstart/start.html): create a self-built app and obtain credentials
-- [OAuth / access token](https://developer.fxiaoke.com/openapi_v2/en/start/auth/app-info.html): appId + appSecret + permanentCode token grant
-- [API call examples](https://developer.fxiaoke.com/openapi_v2/en/start/example/example.html): request/response format and global return codes
-- [Business object reference (Product create)](https://developer.fxiaoke.com/openapi_v2/object/CommoditiesAndProducts/ProductObj/add.html): object CRUD reference
-- [Common services (approval action)](https://developer.fxiaoke.com/openapi_v2/common/process/approval/action.html): approval-workflow API
-- [Deep paging guide](https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html): pagination for large result sets
+- [Client credentials mode](https://developer.fxiaoke.com/openapi_v2/start/auth/app-info.html): appId + appSecret + permanentCode token grant
+- [Authorization code mode](https://developer.fxiaoke.com/openapi_v2/start/auth/auth-code.html): user-delegated OAuth flow
+- [Common parameters](https://developer.fxiaoke.com/openapi_v2/start/example/public.html): the current header convention (authorization / x-fs-ea / x-fs-userid) and thirdTraceId
+- [Legacy parameter style](https://developer.fxiaoke.com/openapi_v2/start/example/old.html): the older body-carried credential convention, still live
+- [Global return codes](https://developer.fxiaoke.com/openapi_v2/start/guide/codes.html): the complete errorCode registry
+- [Rate limits](https://developer.fxiaoke.com/openapi_v2/start/guide/rate.html): 100 calls / 20 seconds per interface; purchased daily quota
+- [Cloud domains](https://developer.fxiaoke.com/openapi_v2/start/guide/cloud.html): the six regional API hosts
+- [Field value formatting](https://developer.fxiaoke.com/openapi_v2/start/guide/param.html): how to write each field type
+- [Deep paging](https://developer.fxiaoke.com/openapi_v2/FAQ/deep-paging.html): the offset-10000 cap and the keyset workaround
+- [Business object reference](https://developer.fxiaoke.com/openapi_v2/object/CommoditiesAndProducts/ProductObj/add.html): 41 domains of object CRUD
+- [Common services](https://developer.fxiaoke.com/openapi_v2/common/process/approval/action.html): approval, flow, directory, file, message, system
+- [Client-side JS API](https://developer.fxiaoke.com/openapi_v2/common/client/guide/overview.html): FSOpen bridge API and Vue UI component library
 - [Help center](https://help.fxiaoke.com/): end-user and admin manual
-- [Pricing](https://www.fxiaoke.com/ap/market-price/)
-- [News / blog](https://www.fxiaoke.com/crm/news/)
+- [Pricing](https://www.fxiaoke.com/ap/market-price/): ¥119 and ¥220 per user per month
+- [News](https://www.fxiaoke.com/crm/news/)
 
 ## Auth
 
-- [OAuth 2.0 Authorization Server Metadata](https://open.fxiaoke.com/.well-known/oauth-authorization-server): RFC 8414; PKCE (S256), authorization_code + refresh_token, dynamic client registration
+- [OAuth 2.0 Authorization Server Metadata](https://open.fxiaoke.com/.well-known/oauth-authorization-server): RFC 8414; PKCE (S256), authorization_code + refresh_token, RFC 7591 dynamic client registration. Served per-region with a host-scoped issuer. Note: jwks_uri returns an empty key set.
+- Token endpoint (documented flow): https://open.fxiaoke.com/oauth2.0/token — grantType `app_secret` or `authorization_code`
+- Access token lifetime 7200s; cache for 6600s and refresh in the 6600–7200s window
+- Token endpoint limit: 10 calls per minute, no concurrent calls
+
+## Not published
+
+- OpenAPI / AsyncAPI / GraphQL / Protobuf specification
+- MCP server (remote or stdio) — probed, none
+- A2A agent card — probed, none
+- llms.txt on any Fxiaoke host — probed, none (this file is generated by API Evangelist)
+- security.txt (RFC 9116), status page, SLA, changelog, deprecation policy
+- OAuth scope registry
+- Server-side SDK on npm, PyPI or Maven Central
 
 ## API Evangelist artifacts
 
 - [Authentication profile](authentication/fxiaoke-authentication.yml)
 - [API conventions](conventions/fxiaoke-conventions.yml)
-- [Error envelope](errors/fxiaoke-problem-types.yml)
+- [Error catalog — 62 global return codes](errors/fxiaoke-problem-types.yml)
+- [Rate limits](rate-limits/fxiaoke-rate-limits.yml)
+- [Plans and pricing](plans/fxiaoke-plans-pricing.yml)
+- [Packages and SDK currency](packages/fxiaoke-packages.yml)
+- [Client-side components](components/fxiaoke-components.yml)
+- [Data model](data-model/fxiaoke-data-model.yml)
+- [OAuth scopes (measured absence)](scopes/fxiaoke-scopes.yml)
+- [MCP probe record](mcp/fxiaoke-mcp.yml)
 - [Standards conformance](conformance/fxiaoke-conformance.yml)
 - [Lifecycle](lifecycle/fxiaoke-lifecycle.yml)
 - [Well-known index](well-known/fxiaoke-well-known.yml)
 - [Domain security](security/fxiaoke-domain-security.yml)
+- [Trust center / certifications](security/fxiaoke-trust-center.yml)
+
+## Compliance
+
+Fxiaoke names ISO/IEC 27001, ISO/IEC 27701, ISO/IEC 20000-1, ISO 9001:2015, China MLPS Level 3 (等保三级), SOC 1 Type II and SOC 2 Type II in section 4.3.2 of its [privacy policy](https://www.fxiaoke.com/secure/index.html). No certificate numbers, auditors, dates or report-request process are published.
 
 ## Contact
 
 - Developer support: open@fxiaoke.com
+- Privacy: privacy@fxiaoke.com
 - Hotline: 400-1122-778
+- Entity: 北京纷扬科技有限责任公司, 北京市海淀区知春路甲63号卫星大厦7层
