@@ -1,0 +1,27 @@
+# Front Door AI Index — fxiaoke — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: fxiaoke
+  lexicon_version: '1.0'
+  probed_at: '2026-09-17'
+  host: www.fxiaoke.com
+  final_host: www.fxiaoke.com
+  ownership: own
+  owner: fxiaoke
+  shares_host_with: null
+  inherited_from: null
+  verdict: scored
+  score: 19
+  host_score: 19
+  density: 22.67
+  words: 838
+  tiers:
+    agentic: 18
+    core: 1
+    model: 0
+  ambiguous: 2
+  top_terms:
+    agentic: 18
+    agent: 2
+    AI: 1
