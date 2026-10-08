@@ -89,3 +89,30 @@ api_pricing_transparency:
 
 ref:
   rate_limits: rate-limits/fxiaoke-rate-limits.yml
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - subscription
+  units: []
+  plans:
+  - name: 专业版
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: 旗舰版
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: 定制报价
+    access: other
+    model: unstated
+    model_how: derived
+    units: []
+    periods: []
