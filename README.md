@@ -64,6 +64,114 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Fxiaoke is a company surfaced as a portfolio company of dcm-ventures, qiming and added to the API Evangelist network as a stub for enrichment. Sector: enterprise. This profile is a lead awaiting the enrichment pipeline.
+Fxiaoke (纷享销客 / Fenxiang) is a Chinese enterprise SaaS company providing a connected, AI-driven "Agentic CRM" platform that spans marketing, sales, and customer service for 6,000+ enterprise customers across manufacturing, consumer goods, healthcare, and technology. Its Open API v2 platform (developer.fxiaoke.com) exposes CRM business objects (accounts, contacts, leads, opportunities, products, orders) and common services such as approval workflows, contact/directory sync, and business-data sync over a JSON/HTTP RPC interface hosted at open.fxiaoke.com. Authentication uses a self-built enterprise application (appId + appSecret + permanentCode) exchanged for a corp/app access token, alongside a modern OAuth 2.1 authorization server (PKCE, dynamic client registration) discoverable via RFC 8414 metadata. Backed by DCM Ventures and Qiming Venture Partners.
 
-Backed by: dcm-ventures, qiming — http://www.fxiaoke.com/
+**Areas:** Company · Enterprise · CRM · Sales · Marketing · Customer Service · Software-as-a-Service · China · Platform-as-a-Service
+
+## Fxiaoke on APIs.io
+
+Everything profiled for Fxiaoke is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/fxiaoke/](https://apis.io/providers/fxiaoke/)** — or go straight to one of the APIs or properties below.
+
+### APIs (1)
+
+- [Fxiaoke Open API v2](https://apis.io/apis/fxiaoke/fxiaoke-open-api-v2/) — The Fxiaoke Open API v2 exposes CRM business objects (accounts, contacts, leads, opportunities, products, orders) and common services (approval workflows,…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Fxiaoke Authentication](https://apis.io/security/fxiaoke/fxiaoke-authentication/)
+- [Fxiaoke Domain Security](https://apis.io/security/fxiaoke/fxiaoke-domain-security/)
+- [Fxiaoke Trust Center](https://apis.io/security/fxiaoke/fxiaoke-trust-center/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Fxiaoke Scopes](https://apis.io/scopes/fxiaoke/fxiaoke-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Fxiaoke Plans Pricing](https://apis.io/plans/fxiaoke/fxiaoke-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Fxiaoke Rate Limits](https://apis.io/rate-limits/fxiaoke/fxiaoke-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](http://www.fxiaoke.com/)
+- [Documentation](https://developer.fxiaoke.com/openapi_v2/)
+- [Getting started](https://developer.fxiaoke.com/openapi_v2/start/quickstart/start.html)
+- [API reference](https://developer.fxiaoke.com/openapi_v2/object/CommoditiesAndProducts/ProductObj/add.html)
+- [Pricing](https://www.fxiaoke.com/ap/market-price/)
+- [Sign up](https://www.fxiaoke.com/ap/reg/)
+- [Support](https://help.fxiaoke.com/)
+- [Blog](https://www.fxiaoke.com/crm/news/)
+- [Terms of service](https://www.fxiaoke.com/protocols/index.html)
+- [Privacy policy](https://www.fxiaoke.com/secure/index.html)
+
+## API Evangelist rating
+
+**Kin Score 48.5** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 0.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 31.6 |
+| Developer ergonomics | 64.3 |
+| Access clarity | 92.1 |
+
+**Agent readiness 20.5** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 39.2** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/fxiaoke/](https://apis.io/providers/fxiaoke/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Fxiaoke: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/fxiaoke/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
